@@ -1,0 +1,33 @@
+# static configuration for traefik
+
+log:
+  level: "WARN"
+
+# don't listen in on us, traefik
+global:
+  sendAnonymousUsage: false
+
+providers:
+  # Enable docker as provider for traefik - containers won't automatically connect
+  docker:
+    exposedbydefault: false
+  # Enable dynamic configuration via files
+  file:
+    filename: "/etc/traefik/traefik-dynamic.yml"
+
+entryPoints:
+  web:
+    address: ":80"
+  web-secure:
+    address: ":443"
+
+certificatesResolvers:
+  ssl:
+    acme:
+      email: "replace-me@gmail.com"
+      storage: "/letsencrypt/acme.json"
+      dnsChallenge:
+        # Duckdns.org
+        provider: "duckdns"
+      # Comment this for production!
+      caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"

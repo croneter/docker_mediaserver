@@ -1,0 +1,26 @@
+# static configuration for traefik
+
+http:
+  routers:
+    # global redirect to https
+    redirs:
+      rule: "hostregexp(`{host:.+}`)"
+      entrypoints:
+        - "web"
+      middlewares:
+        - "redirect-to-https"
+      service: "noop"
+  middlewares:
+    auth:
+      basicAuth:
+        usersFile: "/etc/traefik/userlist.txt"
+    # global redirect to https
+    redirect-to-https:
+      redirectScheme:
+        scheme: "https"
+  services:
+    # noop service, the URL will be never called
+    noop:
+      loadBalancer:
+        servers:
+        - url: "http://127.0.0.1"

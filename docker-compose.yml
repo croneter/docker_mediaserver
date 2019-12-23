@@ -1,0 +1,234 @@
+version: '3.7'
+
+services:
+  # Our reverse-proxy: https://docs.traefik.io/
+  traefik:
+    image: traefik:v2.1.1
+    container_name: traefik
+    restart: always
+    ports:
+      # Web
+      - "80:80"
+      # Web-secure
+      - "443:443"
+      # TODO: The one single Plex public port
+      # - ${plex_advertise_port}:${plex_advertise_port}
+      # Only for development purposes! Traefik dashboard
+      # - 8080:8080
+    environment:
+      - "TZ=${TZ}"
+    env_file:
+      - "secrets/traefik-secrets.env"
+    volumes:
+      # Static configuration
+      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
+      # Dynamic configuration
+      - "./traefik-dynamic.yml:/etc/traefik/traefik-dynamic.yml:ro"
+      # List of username:password[hashed] for authentication
+      - "./secrets/userlist.txt:/etc/traefik/userlist.txt:ro"
+      # Safe SSL certificates by LetsEncrypt
+      - "${config_dir}/letsencrypt:/letsencrypt"
+      # So that Traefik can listen to the Docker events
+      # Potential security risk, see https://github.com/containous/traefik/issues/4174
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    # Note: Do NOT use labels here for traefik purposes
+    # use dynamic configuration file
+  heimdall:
+    image: linuxserver/heimdall:latest
+    container_name: heimdall
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/heimdall:/config"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.heimdall.rule=Host(`${domain}`)"
+      - "traefik.http.routers.heimdall.entrypoints=web-secure"
+      - "traefik.http.routers.heimdall.tls.certresolver=ssl"
+      - "traefik.http.routers.heimdall.middlewares=auth@file"
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    env_file:
+      - "secrets/plex-secrets.env"
+    environment:
+      - "PLEX_UID=${PUID}"
+      - "PLEX_GID=${PGID}"
+      - "TZ=${TZ}"
+      - "ADVERTISE_IP=http://${domain}:${plex_advertise_port}"
+    volumes:
+      - "${config_dir}/plex:/config"
+      - "${movie_dir}:/movies"
+      - "${show_dir}:/shows"
+      - "${music_dir}:/music"
+    ports:
+      # Make sure to forward this port on your router
+      - "32400:32400"
+      # Do NOT forward these following ports on your router - they're LAN only
+      - "1900:1900/udp"  # for access to the Plex DLNA Server
+      - "3005:3005"  # for controlling Plex Home Theater via Plex Companion
+      # - "5353:5353/udp"  # for older Bonjour/Avahi network discovery)
+      - "8324:8324"  # for controlling Plex for Roku via Plex Companion
+      - "32410:32410/udp"  # for current GDM network discovery
+      - "32412:32412/udp"  # for current GDM network discovery
+      - "32413:32413/udp"  # for current GDM network discovery
+      - "32414:32414/udp"  # for current GDM network discovery
+      - "32469:32469"  # for access to the Plex DLNA Server
+      # TODO: route everything via traefik
+  sabnzbd:
+    image: linuxserver/sabnzbd:latest
+    container_name: sabnzbd
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/sabnzbd:/config"
+      - "${download_dir}/complete:/downloads"
+      - "${download_dir}/incomplete-downloads:/incomplete-downloads"
+      - "${download_dir}/watch:/watch"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${domain}`)"
+      - "traefik.http.routers.sabnzbd.entrypoints=web-secure"
+      - "traefik.http.routers.sabnzbd.tls.certresolver=ssl"
+      - "traefik.http.routers.sabnzbd.middlewares=auth@file"
+      - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/sonarr:/config"
+      - "${download_dir}/complete:/downloads"
+      - "${show_dir}:/tv"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${domain}`)"
+      - "traefik.http.routers.sonarr.entrypoints=web-secure"
+      - "traefik.http.routers.sonarr.tls.certresolver=ssl"
+      - "traefik.http.routers.sonarr.middlewares=auth@file"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/radarr:/config"
+      - "${download_dir}/complete:/downloads"
+      - "${movie_dir}:/movies"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${domain}`)"
+      - "traefik.http.routers.radarr.entrypoints=web-secure"
+      - "traefik.http.routers.radarr.tls.certresolver=ssl"
+      - "traefik.http.routers.radarr.middlewares=auth@file"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+  lidarr:
+    image: linuxserver/lidarr:latest
+    container_name: lidarr
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/lidarr:/config"
+      - "${music_dir}:/music"
+      - "${download_dir}:/downloads"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.${domain}`)"
+      - "traefik.http.routers.lidarr.entrypoints=web-secure"
+      - "traefik.http.routers.lidarr.tls.certresolver=ssl"
+      - "traefik.http.routers.lidarr.middlewares=auth@file"
+      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
+  bazarr:
+    image: linuxserver/bazarr:latest
+    container_name: bazarr
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/bazarr:/config"
+      - "${movie_dir}:/movies"
+      - "${show_dir}:/tv"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.${domain}`)"
+      - "traefik.http.routers.bazarr.entrypoints=web-secure"
+      - "traefik.http.routers.bazarr.tls.certresolver=ssl"
+      - "traefik.http.routers.bazarr.middlewares=auth@file"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+  hydra:
+    image: linuxserver/hydra2:latest
+    container_name: hydra
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${config_dir}/hydra2:/config"
+      - "${download_dir}/watch:/downloads"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hydra.rule=Host(`hydra.${domain}`)"
+      - "traefik.http.routers.hydra.entrypoints=web-secure"
+      - "traefik.http.routers.hydra.tls.certresolver=ssl"
+      - "traefik.http.routers.hydra.middlewares=auth@file"
+      - "traefik.http.services.hydra.loadbalancer.server.port=5076"
+  deluge:
+    image: linuxserver/deluge:latest
+    container_name: deluge
+    restart: unless-stopped
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+      - "DELUGE_LOGLEVEL=error"
+    volumes:
+      - "${config_dir}/deluge:/config"
+      - "${download_dir}/complete:/downloads"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.deluge.rule=Host(`deluge.${domain}`)"
+      - "traefik.http.routers.deluge.entrypoints=web-secure"
+      - "traefik.http.routers.deluge.tls.certresolver=ssl"
+      - "traefik.http.routers.deluge.middlewares=auth@file"
+      - "traefik.http.services.deluge.loadbalancer.server.port=8112"
+  portainer:
+    image: portainer/portainer:1.23.0
+    container_name: portainer
+    restart: always
+    environment:
+      - "TZ=${TZ}"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "${config_dir}/portainer:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${domain}`)"
+      - "traefik.http.routers.portainer.entrypoints=web-secure"
+      - "traefik.http.routers.portainer.tls.certresolver=ssl"
+      - "traefik.http.routers.portainer.middlewares=auth@file"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+    command:
+      # portainer clashes with traefik basic auth's header "Authorization"
+      # Plus we're using traefik for auth
+      - "--no-auth"
