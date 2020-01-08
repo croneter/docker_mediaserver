@@ -71,7 +71,13 @@ Copy the output, e.g. `Sherlock:$apr1$C6xAwK9F$J7ozgti6Z6MccTIGMkJQd.` into a fi
 nano ./secrets/userlist.txt
 ```
 
-### SABNZBD
+## Run everything
+To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
+```
+docker-compose up -d
+```
+
+### Configure SABNZBD once
 Add your domain to whitelist. Navigate to your chosen `config_dir`, then
 ```
 cd sabnzbd
