@@ -61,7 +61,7 @@ nano ./secrets/plex-secrets.env
 nano ./secrets/traefik-secrets.env
 ```
 
-### Add (admin) users
+### Add users
 You need to explicitly add users that will be able to login. Let's say you want to add the user `Sherlock` with the password `Holmes`. Get the hashed password like this:
 ```
 htpasswd -nb Sherlock Holmes
@@ -87,6 +87,10 @@ Add your domain to the `host_whitelist`-entry like this:
 ```
 host_whitelist = <other entries>, sabnzbd.example.duckdns.org
 ```
+Deactivate the `X_Frame_Options` to allow iFrames for Organizr by editing the line to
+```
+x_frame_options = 0
+```
 
 ### Setup your domain with plex.tv
 As we're using a reverse proxy, we need to tell Plex where to reach the PMS from outside the LAN. Make sure everything is up and running with `docker-compose up -d`, then grab `Preferences.xml` from the container and safe it to the current working directory:
@@ -103,6 +107,18 @@ Copy the file back:
 docker cp ./Preferences.xml plex:"/config/Library/Application Support/Plex Media Server/Preferences.xml" 
 ```
 Restart with `docker-compose down` and `docker-compose up -d`.
+
+### Setup Organizr
+Chose a `Personal`-License if you want Radarr, Sonarr, etc. working, i.e. appearing as Homepage options. For Organizr Single Sign On, use an email address as username. Set-up the exact same email address as a user within Organizr.
+
+Choose the following Organizr `Auth Proxy` settings in the Organizr settings:
+* Auth Proxy: On
+* Auth Proxy Whitelist: `0.0.0.0/0` (behind Traefik anyway)
+* Auth Proxy Header Name: `X-Forwarded-User`
+
+When adding tabs, use the following setup:
+* Type: `iFrame`
+* Tab Url: https://<service>.croneter-test.duckdns.org
 
 ### Permissions off for writing/accessing a directory?
 Make sure that the user `dockeruser` owns the entire directory (use a user with sudo-rights):

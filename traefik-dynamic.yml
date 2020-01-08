@@ -14,6 +14,9 @@ http:
     auth:
       basicAuth:
         usersFile: "/etc/traefik/userlist.txt"
+        # Enable SSO for Organizr - the username will be forwarded
+        # See https://github.com/causefx/Organizr/issues/1215
+        headerField: "X-Forwarded-User"
     # global redirect to https
     redirect-to-https:
       redirectScheme:
