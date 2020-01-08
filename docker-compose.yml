@@ -232,3 +232,25 @@ services:
       # portainer clashes with traefik basic auth's header "Authorization"
       # Plus we're using traefik for auth
       - "--no-auth"
+  # TODO: check back once a Sonarr/Radarr integration exists
+  # tdarr:
+  #   # Post-Processing, health checks,   re-encoding, etc.
+  #   image: haveagitgat/tdarr_aio:latest
+  #   container_name: tdarr
+  #   restart: unless-stopped
+  #   environment:
+  #     - "TZ=${TZ}"
+  #     - "PUID=${PUID}"
+  #     - "PGID=${PGID}"
+  #   volumes:
+  #     - "${config_dir}/tdarr:/var/lib/mongodb"
+  #     - "${config_dir}/tdarr-cache:/cache"
+  #     - "${movie_dir}:/home/Tdarr/Media/movies"
+  #     - "${show_dir}:/home/Tdarr/Media/shows"
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.tdarr.rule=Host(`tdarr.${domain}`)"
+  #     - "traefik.http.routers.tdarr.entrypoints=web-secure"
+  #     - "traefik.http.routers.tdarr.tls.certresolver=ssl"
+  #     - "traefik.http.routers.tdarr.middlewares=auth@file"
+  #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
