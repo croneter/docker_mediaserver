@@ -64,6 +64,9 @@ services:
       - "traefik.http.routers.organizr.rule=Host(`${domain}`)"
       - "traefik.http.routers.organizr.tls=true"
       - "traefik.http.routers.organizr.tls.certresolver=ssl"
+      # A certificate for the domains company.com (main) and *.company.org (SAN) is requested:
+      - "traefik.http.routers.organizr.tls.domains[0].main=${domain}"
+      - "traefik.http.routers.organizr.tls.domains[0].sans=*.${domain}"
       - "traefik.http.routers.organizr.middlewares=auth@file"
   plex:
     image: linuxserver/plex:latest
