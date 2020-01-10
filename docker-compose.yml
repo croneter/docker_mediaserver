@@ -16,6 +16,8 @@ services:
       # Only for development purposes! Traefik dashboard
       # - 8080:8080
     environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
       - "TZ=${TZ}"
     env_file:
       - "secrets/traefik-secrets.env"
