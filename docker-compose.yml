@@ -7,9 +7,9 @@ services:
     container_name: traefik
     restart: always
     ports:
-      # Web
+      # web
       - "80:80"
-      # Web-secure
+      # websecure
       - "443:443"
       # TODO: The one single Plex public port
       # - ${plex_advertise_port}:${plex_advertise_port}
@@ -22,10 +22,6 @@ services:
     env_file:
       - "secrets/traefik-secrets.env"
     volumes:
-      # Static configuration
-      - "./traefik.yml:/etc/traefik/traefik.yml:ro"
-      # Dynamic configuration
-      - "./traefik-dynamic.yml:/etc/traefik/traefik-dynamic.yml:ro"
       # List of username:password[hashed] for authentication
       - "./secrets/userlist.txt:/etc/traefik/userlist.txt:ro"
       # Safe SSL certificates by LetsEncrypt
@@ -33,7 +29,25 @@ services:
       # So that Traefik can listen to the Docker events
       # Potential security risk, see https://github.com/containous/traefik/issues/4174
       - "/var/run/docker.sock:/var/run/docker.sock"
+    command:
+      # This is the "static traefik configuration"
+      - "--log.level=WARN"
+      # Enable docker as provider for traefik - containers won't automatically connect
+      - "--providers.docker.exposedbydefault=false"
+      # don't listen in on us, traefik
+      - "--global.sendanonymoususage=false"
+      # Entrypoints to our infrastructure
+      - "--entrypoints.web.address:=:80"
+      - "--entrypoints.websecure.address=:443"
+      # letsencrypt SSL certificates ("acme")
+      - "--certificatesresolvers.ssl.acme.email=${letsencrypt_email}"
+      - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns"
+      - "--certificatesresolvers.ssl.acme.dnschallenge.delaybeforecheck=10"
+      # TODO: Comment this for production!
+      - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     labels:
+      # This is the "dynamic traefik configuration" (part of it)
       - "traefik.enable=true"
       # global redirect to https
       - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
@@ -42,7 +56,7 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectScheme.scheme=https"
       # global wildcard certificates
       # See https://github.com/containous/traefik/issues/5317
-      - "traefik.http.routers.wildcard-certs.entrypoints=web-secure"
+      - "traefik.http.routers.wildcard-certs.entrypoints=websecure"
       - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${domain}'
@@ -78,7 +92,7 @@ services:
       - "${config_dir}/organizr:/config"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.organizr.entrypoints=web-secure'
+      - 'traefik.http.routers.organizr.entrypoints=websecure'
       - "traefik.http.routers.organizr.rule=Host(`${domain}`)"
       # global wildcard certificates
       # See https://github.com/containous/traefik/issues/5317
@@ -129,7 +143,7 @@ services:
       - "${download_dir}/watch:/watch"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.sabnzbd.entrypoints=web-secure'
+      - 'traefik.http.routers.sabnzbd.entrypoints=websecure'
       - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${domain}`)"
       - "traefik.http.routers.sabnzbd.tls=true"
       - "traefik.http.routers.sabnzbd.middlewares=auth"
@@ -150,7 +164,7 @@ services:
       - "${show_dir}:/tv"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.sonarr.entrypoints=web-secure'
+      - 'traefik.http.routers.sonarr.entrypoints=websecure'
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.${domain}`)"
       - "traefik.http.routers.sonarr.tls=true"
       - "traefik.http.routers.sonarr.middlewares=auth"
@@ -171,7 +185,7 @@ services:
       - "${movie_dir}:/movies"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.radarr.entrypoints=web-secure'
+      - 'traefik.http.routers.radarr.entrypoints=websecure'
       - "traefik.http.routers.radarr.rule=Host(`radarr.${domain}`)"
       - "traefik.http.routers.radarr.tls=true"
       - "traefik.http.routers.radarr.middlewares=auth"
@@ -192,7 +206,7 @@ services:
       - "${download_dir}:/downloads"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.lidarr.entrypoints=web-secure'
+      - 'traefik.http.routers.lidarr.entrypoints=websecure'
       - "traefik.http.routers.lidarr.rule=Host(`lidarr.${domain}`)"
       - "traefik.http.routers.lidarr.tls=true"
       - "traefik.http.routers.lidarr.middlewares=auth"
@@ -213,7 +227,7 @@ services:
       - "${show_dir}:/tv"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.bazarr.entrypoints=web-secure'
+      - 'traefik.http.routers.bazarr.entrypoints=websecure'
       - "traefik.http.routers.bazarr.rule=Host(`bazarr.${domain}`)"
       - "traefik.http.routers.bazarr.tls=true"
       - "traefik.http.routers.bazarr.middlewares=auth"
@@ -233,7 +247,7 @@ services:
       - "${download_dir}/watch:/downloads"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.hydra.entrypoints=web-secure'
+      - 'traefik.http.routers.hydra.entrypoints=websecure'
       - "traefik.http.routers.hydra.rule=Host(`hydra.${domain}`)"
       - "traefik.http.routers.hydra.tls=true"
       - "traefik.http.routers.hydra.middlewares=auth"
@@ -254,7 +268,7 @@ services:
       - "${download_dir}/complete:/downloads"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.deluge.entrypoints=web-secure'
+      - 'traefik.http.routers.deluge.entrypoints=websecure'
       - "traefik.http.routers.deluge.rule=Host(`deluge.${domain}`)"
       - "traefik.http.routers.deluge.tls=true"
       - "traefik.http.routers.deluge.middlewares=auth"
@@ -272,7 +286,7 @@ services:
       - "${config_dir}/portainer:/data"
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.portainer.entrypoints=web-secure'
+      - 'traefik.http.routers.portainer.entrypoints=websecure'
       - "traefik.http.routers.portainer.rule=Host(`portainer.${domain}`)"
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.middlewares=auth"
