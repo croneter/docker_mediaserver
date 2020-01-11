@@ -26,5 +26,6 @@ certificatesResolvers:
       dnsChallenge:
         # Duckdns.org
         provider: "duckdns"
+        delayBeforeCheck: 10
       # Comment this for production!
       caServer: "https://acme-staging-v02.api.letsencrypt.org/directory"
