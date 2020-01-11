@@ -11,7 +11,7 @@ http:
         certresolver: "ssl"
         domains:
           - main: "example.duckdns.org"
-          sans:
+          - sans:
             - "*.example.duckdns.org"
     # global redirect to https
     redirs:
