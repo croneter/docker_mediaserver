@@ -1,7 +1,7 @@
 # static configuration for traefik
 
 log:
-  level: "DEBUG"
+  level: "WARN"
 
 # don't listen in on us, traefik
 global:

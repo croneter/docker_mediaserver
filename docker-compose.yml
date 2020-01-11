@@ -39,11 +39,9 @@ services:
       - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.redirs.entrypoints=web"
       - "traefik.http.routers.redirs.middlewares=redirect-to-https"
-      - "traefik.http.routers.redirs.service=noop"
       - "traefik.http.middlewares.redirect-to-https.redirectScheme.scheme=https"
-      # Noop service, will never be calles
-      - "traefik.http.services.noop.loadBalancer.server.url=http://127.0.0.1"
       # global wildcard certificates
+      # See https://github.com/containous/traefik/issues/5317
       - "traefik.http.routers.wildcard-certs.entrypoints=web-secure"
       - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
