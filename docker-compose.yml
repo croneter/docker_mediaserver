@@ -85,9 +85,6 @@ services:
       # global wildcard certificates
       # See https://github.com/containous/traefik/issues/5317
       - "traefik.http.routers.organizr.tls=true"
-      - 'traefik.http.routers.organizr.tls.certresolver=ssl'
-      - 'traefik.http.routers.organizr.tls.domains[0].main=${domain}'
-      - 'traefik.http.routers.organizr.tls.domains[0].sans=*.${domain}'
       - "traefik.http.routers.organizr.middlewares=auth"
   plex:
     image: linuxserver/plex:latest
