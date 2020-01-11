@@ -33,12 +33,6 @@ services:
       # So that Traefik can listen to the Docker events
       # Potential security risk, see https://github.com/containous/traefik/issues/4174
       - "/var/run/docker.sock:/var/run/docker.sock"
-    labels:
-      # global wildcard certificates
-      # See https://github.com/containous/traefik/issues/5317
-      - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${domain}'
   # heimdall:
   #   image: linuxserver/heimdall:latest
   #   container_name: heimdall
@@ -68,7 +62,12 @@ services:
       - "traefik.enable=true"
       - 'traefik.http.routers.organizr.entrypoints=web-secure'
       - "traefik.http.routers.organizr.rule=Host(`${domain}`)"
+      # global wildcard certificates
+      # See https://github.com/containous/traefik/issues/5317
       - "traefik.http.routers.organizr.tls=true"
+      - 'traefik.http.routers.organizr.tls.certresolver=ssl'
+      - 'traefik.http.routers.organizr.tls.domains[0].main=${domain}'
+      - 'traefik.http.routers.organizr.tls.domains[0].sans=*.${domain}'
       - "traefik.http.routers.organizr.middlewares=auth@file"
   plex:
     image: linuxserver/plex:latest
