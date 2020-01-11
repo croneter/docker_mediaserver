@@ -31,7 +31,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     command:
       # This is the "static traefik configuration"
-      - "--log.level=WARN"
+      - "--log.level=DEBUG"
       # Enable docker as provider for traefik. Containers won't automatically connect
       - "--providers.docker.exposedbydefault=false"
       # don't listen in on us, traefik
@@ -43,7 +43,6 @@ services:
       - "--certificatesresolvers.ssl.acme.email=${letsencrypt_email}"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns"
-      - "--certificatesresolvers.ssl.acme.dnschallenge.delaybeforecheck=10"
       # TODO: Comment this for production!
       - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     labels:
