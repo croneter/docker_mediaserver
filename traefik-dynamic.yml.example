@@ -1,7 +1,18 @@
 # static configuration for traefik
+# You only need to change the "TODO". Then safe as traefik-dynamic.yml
 
 http:
   routers:
+    # global wildcard certificates
+    # See https://github.com/containous/traefik/issues/5317
+    # TODO: replace example.duckdns.org with your domain (=domain from .env)
+    wildcard-certs:
+      tls:
+        certresolver: "ssl"
+        domains:
+          - main: "example.duckdns.org"
+          sans:
+            - "*.example.duckdns.org"
     # global redirect to https
     redirs:
       rule: "hostregexp(`{host:.+}`)"

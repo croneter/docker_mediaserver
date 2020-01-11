@@ -33,12 +33,8 @@ services:
       # So that Traefik can listen to the Docker events
       # Potential security risk, see https://github.com/containous/traefik/issues/4174
       - "/var/run/docker.sock:/var/run/docker.sock"
-    labels:
-      # global wildcard certificates
-      # See https://github.com/containous/traefik/issues/5317
-      - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${domain}'
+    # Note: Do NOT use labels here for traefik purposes
+    # use dynamic configuration file
   # heimdall:
   #   image: linuxserver/heimdall:latest
   #   container_name: heimdall
