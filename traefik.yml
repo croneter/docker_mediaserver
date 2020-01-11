@@ -1,7 +1,7 @@
 # static configuration for traefik
 
 log:
-  level: "WARN"
+  level: "DEBUG"
 
 # don't listen in on us, traefik
 global:
@@ -11,9 +11,6 @@ providers:
   # Enable docker as provider for traefik - containers won't automatically connect
   docker:
     exposedbydefault: false
-  # Enable dynamic configuration via files
-  file:
-    filename: "/etc/traefik/traefik-dynamic.yml"
 
 entryPoints:
   web:
