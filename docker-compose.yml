@@ -19,7 +19,8 @@ services:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
       - "TZ=${TZ}"
-      # See https://go-acme.github.io/lego/dns/duckdns/
+      # See https://go-acme.github.io/lego/dns/duckdns/ and
+      # https://github.com/go-acme/lego/issues/967
       # API request timeout
       - "DUCKDNS_HTTP_TIMEOUT=30"
       # Maximum waiting time for DNS propagation
