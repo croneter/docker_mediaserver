@@ -23,9 +23,11 @@ services:
       # API request timeout
       - "DUCKDNS_HTTP_TIMEOUT=30"
       # Maximum waiting time for DNS propagation
-      - "DUCKDNS_PROPAGATION_TIMEOUT=240"
+      - "DUCKDNS_PROPAGATION_TIMEOUT=600"
+      # Time between DNS propagation check
+      - "DUCKDNS_POLLING_INTERVAL=16"
       # The TTL of the TXT record used for the DNS challenge
-      - "DUCKDNS_TTL=240"
+      - "DUCKDNS_TTL=600"
     env_file:
       - "secrets/traefik-secrets.env"
     volumes:
@@ -38,7 +40,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     command:
       # This is the "static traefik configuration"
-      - "--log.level=DEBUG"
+      - "--log.level=WARN"
       # Enable docker as provider for traefik. Containers won't automatically connect
       - "--providers.docker.exposedbydefault=false"
       # don't listen in on us, traefik
