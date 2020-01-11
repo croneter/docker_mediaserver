@@ -67,7 +67,7 @@ services:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.heimdall.rule=Host(`${domain}`)"
   #     - "traefik.http.routers.heimdall.tls=true"
-  #     - "traefik.http.routers.heimdall.middlewares=auth@file"
+  #     - "traefik.http.routers.heimdall.middlewares=auth"
   organizr:
     image: organizrtools/organizr-v2:latest
     container_name: organizr
@@ -88,7 +88,7 @@ services:
       - 'traefik.http.routers.organizr.tls.certresolver=ssl'
       - 'traefik.http.routers.organizr.tls.domains[0].main=${domain}'
       - 'traefik.http.routers.organizr.tls.domains[0].sans=*.${domain}'
-      - "traefik.http.routers.organizr.middlewares=auth@file"
+      - "traefik.http.routers.organizr.middlewares=auth"
   plex:
     image: linuxserver/plex:latest
     container_name: plex
@@ -137,7 +137,7 @@ services:
       - 'traefik.http.routers.sabnzbd.entrypoints=web-secure'
       - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${domain}`)"
       - "traefik.http.routers.sabnzbd.tls=true"
-      - "traefik.http.routers.sabnzbd.middlewares=auth@file"
+      - "traefik.http.routers.sabnzbd.middlewares=auth"
       - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
       # Enable iFrames in Organizr
       - "traefik.http.services.sabnzbd.loadbalancer.passHostHeader=true"
@@ -158,7 +158,7 @@ services:
       - 'traefik.http.routers.sonarr.entrypoints=web-secure'
       - "traefik.http.routers.sonarr.rule=Host(`sonarr.${domain}`)"
       - "traefik.http.routers.sonarr.tls=true"
-      - "traefik.http.routers.sonarr.middlewares=auth@file"
+      - "traefik.http.routers.sonarr.middlewares=auth"
       - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
       # Enable iFrames in Organizr
       - "traefik.http.services.sonarr.loadbalancer.passHostHeader=true"
@@ -179,7 +179,7 @@ services:
       - 'traefik.http.routers.radarr.entrypoints=web-secure'
       - "traefik.http.routers.radarr.rule=Host(`radarr.${domain}`)"
       - "traefik.http.routers.radarr.tls=true"
-      - "traefik.http.routers.radarr.middlewares=auth@file"
+      - "traefik.http.routers.radarr.middlewares=auth"
       - "traefik.http.services.radarr.loadbalancer.server.port=7878"
       # Enable iFrames in Organizr
       - "traefik.http.services.radarr.loadbalancer.passHostHeader=true"
@@ -200,7 +200,7 @@ services:
       - 'traefik.http.routers.lidarr.entrypoints=web-secure'
       - "traefik.http.routers.lidarr.rule=Host(`lidarr.${domain}`)"
       - "traefik.http.routers.lidarr.tls=true"
-      - "traefik.http.routers.lidarr.middlewares=auth@file"
+      - "traefik.http.routers.lidarr.middlewares=auth"
       - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
       # Enable iFrames in Organizr
       - "traefik.http.services.lidarr.loadbalancer.passHostHeader=true"
@@ -221,7 +221,7 @@ services:
       - 'traefik.http.routers.bazarr.entrypoints=web-secure'
       - "traefik.http.routers.bazarr.rule=Host(`bazarr.${domain}`)"
       - "traefik.http.routers.bazarr.tls=true"
-      - "traefik.http.routers.bazarr.middlewares=auth@file"
+      - "traefik.http.routers.bazarr.middlewares=auth"
       - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
       # Enable iFrames in Organizr
       - "traefik.http.services.bazarr.loadbalancer.passHostHeader=true"
@@ -241,7 +241,7 @@ services:
       - 'traefik.http.routers.hydra.entrypoints=web-secure'
       - "traefik.http.routers.hydra.rule=Host(`hydra.${domain}`)"
       - "traefik.http.routers.hydra.tls=true"
-      - "traefik.http.routers.hydra.middlewares=auth@file"
+      - "traefik.http.routers.hydra.middlewares=auth"
       - "traefik.http.services.hydra.loadbalancer.server.port=5076"
       # Enable iFrames in Organizr
       - "traefik.http.services.hydra.loadbalancer.passHostHeader=true"
@@ -262,7 +262,7 @@ services:
       - 'traefik.http.routers.deluge.entrypoints=web-secure'
       - "traefik.http.routers.deluge.rule=Host(`deluge.${domain}`)"
       - "traefik.http.routers.deluge.tls=true"
-      - "traefik.http.routers.deluge.middlewares=auth@file"
+      - "traefik.http.routers.deluge.middlewares=auth"
       - "traefik.http.services.deluge.loadbalancer.server.port=8112"
       # Enable iFrames in Organizr
       - "traefik.http.services.deluge.loadbalancer.passHostHeader=true"
@@ -280,7 +280,7 @@ services:
       - 'traefik.http.routers.portainer.entrypoints=web-secure'
       - "traefik.http.routers.portainer.rule=Host(`portainer.${domain}`)"
       - "traefik.http.routers.portainer.tls=true"
-      - "traefik.http.routers.portainer.middlewares=auth@file"
+      - "traefik.http.routers.portainer.middlewares=auth"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
       # Enable iFrames in Organizr
       - "traefik.http.services.portainer.loadbalancer.passHostHeader=true"
@@ -307,5 +307,5 @@ services:
   #     - "traefik.enable=true"
   #     - "traefik.http.routers.tdarr.rule=Host(`tdarr.${domain}`)"
   #     - "traefik.http.routers.tdarr.tls=true"
-  #     - "traefik.http.routers.tdarr.middlewares=auth@file"
+  #     - "traefik.http.routers.tdarr.middlewares=auth"
   #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
