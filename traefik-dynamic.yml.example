@@ -4,7 +4,8 @@
 http:
   routers:
     # global wildcard certificates
-    # See https://github.com/containous/traefik/issues/5317
+    # See https://github.com/containous/traefik/issues/5317 or
+    # https://www.reddit.com/r/Traefik/comments/e9ubk2/le_wildcard_certificates_on_traefik_v2/
     # TODO: replace example.duckdns.org with your domain (=domain from .env)
     wildcard-certs:
       tls:
@@ -13,6 +14,7 @@ http:
           - main: "example.duckdns.org"
           - sans:
             - "*.example.duckdns.org"
+      service: "noob"
     # global redirect to https
     redirs:
       rule: "hostregexp(`{host:.+}`)"
