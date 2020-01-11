@@ -19,6 +19,13 @@ services:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
       - "TZ=${TZ}"
+      # See https://go-acme.github.io/lego/dns/duckdns/
+      # API request timeout
+      - "DUCKDNS_HTTP_TIMEOUT=30"
+      # Maximum waiting time for DNS propagation
+      - "DUCKDNS_PROPAGATION_TIMEOUT=240"
+      # The TTL of the TXT record used for the DNS challenge
+      - "DUCKDNS_TTL=240"
     env_file:
       - "secrets/traefik-secrets.env"
     volumes:
