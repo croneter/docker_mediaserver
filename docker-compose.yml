@@ -39,11 +39,12 @@ services:
       - "DUCKDNS_POLLING_INTERVAL=16"
       # The TTL of the TXT record used for the DNS challenge
       - "DUCKDNS_TTL=600"
-    env_file:
-      - "secrets/traefik-secrets.env"
+      # Link environment variable with secrets file
+      - "DUCKDNS_TOKEN_FILE='/run/secrets/duckdns_token'"
+    secrets:
+      - "duckdns_token"
+      - "userlist"
     volumes:
-      # List of username:password[hashed] for authentication
-      - "./secrets/userlist.txt:/etc/traefik/userlist.txt:ro"
       # Safe SSL certificates by LetsEncrypt
       - "${config_dir}/letsencrypt:/letsencrypt"
       # So that Traefik can listen to the Docker events
@@ -90,7 +91,7 @@ services:
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${domain}'
       # Authentication
-      - "traefik.http.middlewares.auth.basicAuth.usersFile=/etc/traefik/userlist.txt"
+      - "traefik.http.middlewares.auth.basicAuth.usersFile=/run/secrets/userlist"
       # Enable SSO for Organizr - the username will be forwarded
       # See https://github.com/causefx/Organizr/issues/1215
       - "traefik.http.middlewares.auth.basicAuth.headerField=X-Forwarded-User"
@@ -131,13 +132,15 @@ services:
     image: linuxserver/plex:latest
     container_name: plex
     restart: unless-stopped
-    env_file:
-      - "secrets/plex-secrets.env"
+    secrets:
+      - "plex_claim"
     environment:
       - "PLEX_UID=${PUID}"
       - "PLEX_GID=${PGID}"
       - "TZ=${TZ}"
       - "ADVERTISE_IP=http://${domain}:${plex_advertise_port}"
+      # Link environment variable with secrets file
+      - "PLEX_CLAIM_FILE='/run/secrets/plex_claim'"
     volumes:
       - "${config_dir}/plex:/config"
       - "${movie_dir}:/movies"
@@ -357,3 +360,11 @@ services:
   #     - "traefik.http.routers.tdarr.tls=true"
   #     - "traefik.http.routers.tdarr.middlewares=auth"
   #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
+
+secrets:
+  duckdns_token:
+    file: "./secrets/duckdns_token.txt"
+  userlist:
+    file: "./secrets/userlist.txt"
+  plex_claim:
+    file: "./secrets/plex_claim.txt"
