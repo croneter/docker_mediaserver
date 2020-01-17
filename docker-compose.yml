@@ -11,8 +11,18 @@ services:
       - "80:80"
       # websecure
       - "443:443"
-      # TODO: The one single Plex public port
-      # - ${plex_advertise_port}:${plex_advertise_port}
+      # Plex
+      - "${plex_advertise_port}:${plex_advertise_port}"  # Main Plex port
+      # Do NOT forward these following ports on your router - they're LAN only
+      - "1900:1900"  # for access to the Plex DLNA Server
+      - "3005:3005"  # for controlling Plex Home Theater via Plex Companion
+      # - "5353:5353/udp"  # for older Bonjour/Avahi network discovery)
+      - "8324:8324"  # for controlling Plex for Roku via Plex Companion
+      - "32410:32410"  # for current GDM network discovery
+      - "32412:32412"  # for current GDM network discovery
+      - "32413:32413"  # for current GDM network discovery
+      - "32414:32414"  # for current GDM network discovery
+      - "32469:32469"  # for access to the Plex DLNA Server
       # Only for development purposes! Traefik dashboard
       # - 8080:8080
     environment:
@@ -49,6 +59,16 @@ services:
       # Entrypoints to our infrastructure
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      # Plex entrypoints
+      - "--entrypoints.plex0.address=:${plex_advertise_port}"  # Main Plex port
+      - "--entrypoints.plex1.address=:1900"
+      - "--entrypoints.plex2.address=:3005"
+      - "--entrypoints.plex3.address=:8324"
+      - "--entrypoints.plex4.address=:32410"
+      - "--entrypoints.plex5.address=:32412"
+      - "--entrypoints.plex6.address=:32413"
+      - "--entrypoints.plex7.address=:32414"
+      - "--entrypoints.plex8.address=:32469"
       # letsencrypt SSL certificates ("acme")
       - "--certificatesresolvers.ssl.acme.email=${letsencrypt_email}"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
@@ -123,20 +143,30 @@ services:
       - "${movie_dir}:/movies"
       - "${show_dir}:/shows"
       - "${music_dir}:/music"
-    ports:
-      # Make sure to forward this port on your router
-      - "32400:32400"
-      # Do NOT forward these following ports on your router - they're LAN only
-      - "1900:1900/udp"  # for access to the Plex DLNA Server
-      - "3005:3005"  # for controlling Plex Home Theater via Plex Companion
-      # - "5353:5353/udp"  # for older Bonjour/Avahi network discovery)
-      - "8324:8324"  # for controlling Plex for Roku via Plex Companion
-      - "32410:32410/udp"  # for current GDM network discovery
-      - "32412:32412/udp"  # for current GDM network discovery
-      - "32413:32413/udp"  # for current GDM network discovery
-      - "32414:32414/udp"  # for current GDM network discovery
-      - "32469:32469"  # for access to the Plex DLNA Server
-      # TODO: route everything via traefik
+    labels:
+      - "traefik.enable=true"
+      # Main Plex port, remapped to port 32400
+      - "traefik.tcp.routers.plex0.entrypoints=plex0"
+      - "traefik.tcp.routers.plex0.rule=HostSNI(`*`)"
+      - "traefik.tcp.routers.plex0.tls.passthrough=true"
+      - "traefik.tcp.services.plex0.loadbalancer.server.port=32400"
+      # All the other Plex ports
+      - "traefik.http.routers.plex1.entrypoints=plex1"
+      - "traefik.http.routers.plex1.rule=Host(`*`)"
+      - "traefik.http.routers.plex2.entrypoints=plex2"
+      - "traefik.http.routers.plex2.rule=Host(`*`)"
+      - "traefik.http.routers.plex3.entrypoints=plex3"
+      - "traefik.http.routers.plex3.rule=Host(`*`)"
+      - "traefik.http.routers.plex4.entrypoints=plex4"
+      - "traefik.http.routers.plex4.rule=Host(`*`)"
+      - "traefik.http.routers.plex5.entrypoints=plex5"
+      - "traefik.http.routers.plex5.rule=Host(`*`)"
+      - "traefik.http.routers.plex6.entrypoints=plex6"
+      - "traefik.http.routers.plex6.rule=Host(`*`)"
+      - "traefik.http.routers.plex7.entrypoints=plex7"
+      - "traefik.http.routers.plex7.rule=Host(`*`)"
+      - "traefik.http.routers.plex8.entrypoints=plex8"
+      - "traefik.http.routers.plex8.rule=Host(`*`)"
   sabnzbd:
     image: linuxserver/sabnzbd:latest
     container_name: sabnzbd
