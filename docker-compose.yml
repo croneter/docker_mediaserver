@@ -12,7 +12,7 @@ services:
       # websecure
       - "443:443"
       # Plex
-      - "${plex_advertise_port}:${plex_advertise_port}"  # Main Plex port
+      - "${PLEX_ADVERTISE_PORT}:${PLEX_ADVERTISE_PORT}"  # Main Plex port
       # Do NOT forward these following ports on your router - they're LAN only
       - "1900:1900"  # for access to the Plex DLNA Server
       - "3005:3005"  # for controlling Plex Home Theater via Plex Companion
@@ -46,7 +46,7 @@ services:
       - "userlist"
     volumes:
       # Safe SSL certificates by LetsEncrypt
-      - "${config_dir}/letsencrypt:/letsencrypt"
+      - "${CONFIG_DIR}/letsencrypt:/letsencrypt"
       # So that Traefik can listen to the Docker events
       # Potential security risk, see https://github.com/containous/traefik/issues/4174
       - "/var/run/docker.sock:/var/run/docker.sock"
@@ -61,7 +61,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       # Plex entrypoints
-      - "--entrypoints.plex0.address=:${plex_advertise_port}"  # Main Plex port
+      - "--entrypoints.plex0.address=:${PLEX_ADVERTISE_PORT}"  # Main Plex port
       - "--entrypoints.plex1.address=:1900"
       - "--entrypoints.plex2.address=:3005"
       - "--entrypoints.plex3.address=:8324"
@@ -71,7 +71,7 @@ services:
       - "--entrypoints.plex7.address=:32414"
       - "--entrypoints.plex8.address=:32469"
       # letsencrypt SSL certificates ("acme")
-      - "--certificatesresolvers.ssl.acme.email=${letsencrypt_email}"
+      - "--certificatesresolvers.ssl.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns"
       # TODO: Comment this for production!
@@ -88,8 +88,8 @@ services:
       # See https://github.com/containous/traefik/issues/5317
       - "traefik.http.routers.wildcard-certs.entrypoints=websecure"
       - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${domain}'
-      - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${domain}'
+      - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${DOMAIN}'
+      - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${DOMAIN}'
       # Authentication
       - "traefik.http.middlewares.auth.basicAuth.usersFile=/run/secrets/userlist"
       # Enable SSO for Organizr - the username will be forwarded
@@ -104,10 +104,10 @@ services:
   #     - "PGID=${PGID}"
   #     - "TZ=${TZ}"
   #   volumes:
-  #     - "${config_dir}/heimdall:/config"
+  #     - "${CONFIG_DIR}/heimdall:/config"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.http.routers.heimdall.rule=Host(`${domain}`)"
+  #     - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN}`)"
   #     - "traefik.http.routers.heimdall.tls=true"
   #     - "traefik.http.routers.heimdall.middlewares=auth"
   organizr:
@@ -119,11 +119,11 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/organizr:/config"
+      - "${CONFIG_DIR}/organizr:/config"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.organizr.entrypoints=websecure'
-      - "traefik.http.routers.organizr.rule=Host(`${domain}`)"
+      - "traefik.http.routers.organizr.rule=Host(`${DOMAIN}`)"
       # global wildcard certificates
       # See https://github.com/containous/traefik/issues/5317
       - "traefik.http.routers.organizr.tls=true"
@@ -138,14 +138,14 @@ services:
       - "PLEX_UID=${PUID}"
       - "PLEX_GID=${PGID}"
       - "TZ=${TZ}"
-      - "ADVERTISE_IP=http://${domain}:${plex_advertise_port}"
+      - "ADVERTISE_IP=http://${DOMAIN}:${PLEX_ADVERTISE_PORT}"
       # Link environment variable with secrets file
       - "PLEX_CLAIM_FILE='/run/secrets/plex_claim'"
     volumes:
-      - "${config_dir}/plex:/config"
-      - "${movie_dir}:/movies"
-      - "${show_dir}:/shows"
-      - "${music_dir}:/music"
+      - "${CONFIG_DIR}/plex:/config"
+      - "${MOVIE_DIR}:/movies"
+      - "${SHOW_DIR}:/shows"
+      - "${MUSIC_DIR}:/music"
     labels:
       - "traefik.enable=true"
       # Main Plex port, remapped to port 32400
@@ -179,14 +179,14 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/sabnzbd:/config"
-      - "${download_dir}/complete:/downloads"
-      - "${download_dir}/incomplete-downloads:/incomplete-downloads"
-      - "${download_dir}/watch:/watch"
+      - "${CONFIG_DIR}/sabnzbd:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+      - "${DOWNLOAD_DIR}/incomplete-downloads:/incomplete-downloads"
+      - "${DOWNLOAD_DIR}/watch:/watch"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.sabnzbd.entrypoints=websecure'
-      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${domain}`)"
+      - "traefik.http.routers.sabnzbd.rule=Host(`sabnzbd.${DOMAIN}`)"
       - "traefik.http.routers.sabnzbd.tls=true"
       - "traefik.http.routers.sabnzbd.middlewares=auth"
       - "traefik.http.services.sabnzbd.loadbalancer.server.port=8080"
@@ -201,13 +201,13 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/sonarr:/config"
-      - "${download_dir}/complete:/downloads"
-      - "${show_dir}:/tv"
+      - "${CONFIG_DIR}/sonarr:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+      - "${SHOW_DIR}:/tv"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.sonarr.entrypoints=websecure'
-      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${domain}`)"
+      - "traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)"
       - "traefik.http.routers.sonarr.tls=true"
       - "traefik.http.routers.sonarr.middlewares=auth"
       - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
@@ -222,13 +222,13 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/radarr:/config"
-      - "${download_dir}/complete:/downloads"
-      - "${movie_dir}:/movies"
+      - "${CONFIG_DIR}/radarr:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+      - "${MOVIE_DIR}:/movies"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.radarr.entrypoints=websecure'
-      - "traefik.http.routers.radarr.rule=Host(`radarr.${domain}`)"
+      - "traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)"
       - "traefik.http.routers.radarr.tls=true"
       - "traefik.http.routers.radarr.middlewares=auth"
       - "traefik.http.services.radarr.loadbalancer.server.port=7878"
@@ -243,13 +243,13 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/lidarr:/config"
-      - "${music_dir}:/music"
-      - "${download_dir}:/downloads"
+      - "${CONFIG_DIR}/lidarr:/config"
+      - "${MUSIC_DIR}:/music"
+      - "${DOWNLOAD_DIR}:/downloads"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.lidarr.entrypoints=websecure'
-      - "traefik.http.routers.lidarr.rule=Host(`lidarr.${domain}`)"
+      - "traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN}`)"
       - "traefik.http.routers.lidarr.tls=true"
       - "traefik.http.routers.lidarr.middlewares=auth"
       - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
@@ -264,13 +264,13 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/bazarr:/config"
-      - "${movie_dir}:/movies"
-      - "${show_dir}:/tv"
+      - "${CONFIG_DIR}/bazarr:/config"
+      - "${MOVIE_DIR}:/movies"
+      - "${SHOW_DIR}:/tv"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.bazarr.entrypoints=websecure'
-      - "traefik.http.routers.bazarr.rule=Host(`bazarr.${domain}`)"
+      - "traefik.http.routers.bazarr.rule=Host(`bazarr.${DOMAIN}`)"
       - "traefik.http.routers.bazarr.tls=true"
       - "traefik.http.routers.bazarr.middlewares=auth"
       - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
@@ -285,12 +285,12 @@ services:
       - "PGID=${PGID}"
       - "TZ=${TZ}"
     volumes:
-      - "${config_dir}/hydra2:/config"
-      - "${download_dir}/watch:/downloads"
+      - "${CONFIG_DIR}/hydra2:/config"
+      - "${DOWNLOAD_DIR}/watch:/downloads"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.hydra.entrypoints=websecure'
-      - "traefik.http.routers.hydra.rule=Host(`hydra.${domain}`)"
+      - "traefik.http.routers.hydra.rule=Host(`hydra.${DOMAIN}`)"
       - "traefik.http.routers.hydra.tls=true"
       - "traefik.http.routers.hydra.middlewares=auth"
       - "traefik.http.services.hydra.loadbalancer.server.port=5076"
@@ -306,12 +306,12 @@ services:
       - "TZ=${TZ}"
       - "DELUGE_LOGLEVEL=error"
     volumes:
-      - "${config_dir}/deluge:/config"
-      - "${download_dir}/complete:/downloads"
+      - "${CONFIG_DIR}/deluge:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.deluge.entrypoints=websecure'
-      - "traefik.http.routers.deluge.rule=Host(`deluge.${domain}`)"
+      - "traefik.http.routers.deluge.rule=Host(`deluge.${DOMAIN}`)"
       - "traefik.http.routers.deluge.tls=true"
       - "traefik.http.routers.deluge.middlewares=auth"
       - "traefik.http.services.deluge.loadbalancer.server.port=8112"
@@ -325,11 +325,11 @@ services:
       - "TZ=${TZ}"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "${config_dir}/portainer:/data"
+      - "${CONFIG_DIR}/portainer:/data"
     labels:
       - "traefik.enable=true"
       - 'traefik.http.routers.portainer.entrypoints=websecure'
-      - "traefik.http.routers.portainer.rule=Host(`portainer.${domain}`)"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)"
       - "traefik.http.routers.portainer.tls=true"
       - "traefik.http.routers.portainer.middlewares=auth"
       - "traefik.http.services.portainer.loadbalancer.server.port=9000"
@@ -350,13 +350,13 @@ services:
   #     - "PUID=${PUID}"
   #     - "PGID=${PGID}"
   #   volumes:
-  #     - "${config_dir}/tdarr:/var/lib/mongodb"
-  #     - "${config_dir}/tdarr-cache:/cache"
-  #     - "${movie_dir}:/home/Tdarr/Media/movies"
-  #     - "${show_dir}:/home/Tdarr/Media/shows"
+  #     - "${CONFIG_DIR}/tdarr:/var/lib/mongodb"
+  #     - "${CONFIG_DIR}/tdarr-cache:/cache"
+  #     - "${MOVIE_DIR}:/home/Tdarr/Media/movies"
+  #     - "${SHOW_DIR}:/home/Tdarr/Media/shows"
   #   labels:
   #     - "traefik.enable=true"
-  #     - "traefik.http.routers.tdarr.rule=Host(`tdarr.${domain}`)"
+  #     - "traefik.http.routers.tdarr.rule=Host(`tdarr.${DOMAIN}`)"
   #     - "traefik.http.routers.tdarr.tls=true"
   #     - "traefik.http.routers.tdarr.middlewares=auth"
   #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
