@@ -40,9 +40,8 @@ services:
       # The TTL of the TXT record used for the DNS challenge
       - "DUCKDNS_TTL=600"
       # Link environment variable with secrets file
-      - "DUCKDNS_TOKEN_FILE='/run/secrets/duckdns_token'"
+      - "DUCKDNS_TOKEN=${DUCKDNS_TOKEN}"
     secrets:
-      - "duckdns_token"
       - "userlist"
     volumes:
       # Safe SSL certificates by LetsEncrypt
@@ -75,7 +74,7 @@ services:
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns"
       # TODO: Comment this for production!
-      - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      # - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     labels:
       # This is the "dynamic traefik configuration" (part of it)
       - "traefik.enable=true"
@@ -362,8 +361,6 @@ services:
   #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
 
 secrets:
-  duckdns_token:
-    file: "./secrets/duckdns_token.txt"
   userlist:
     file: "./secrets/userlist.txt"
   plex_claim:
