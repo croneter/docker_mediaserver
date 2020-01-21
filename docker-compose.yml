@@ -134,8 +134,8 @@ services:
     secrets:
       - "plex_claim"
     environment:
-      - "PLEX_UID=${PUID}"
-      - "PLEX_GID=${PGID}"
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
       - "TZ=${TZ}"
       - "ADVERTISE_IP=http://${DOMAIN}:${PLEX_ADVERTISE_PORT}"
       # Link environment variable with secrets file
