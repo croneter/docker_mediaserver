@@ -152,9 +152,6 @@ services:
       - "traefik.tcp.routers.plex0.rule=HostSNI(`*`)"
       - "traefik.tcp.routers.plex0.tls.passthrough=true"
       - "traefik.tcp.services.plex0.loadbalancer.server.port=32400"
-      # Fix for secure websockets. See:
-      # https://community.containo.us/t/how-to-make-websockets-work-with-traefik-2-0-setting-up-rancher/1732/3
-      - "traefik.tcp.middlewares.websocketheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       # All the other Plex ports
       - "traefik.http.routers.plex1.entrypoints=plex1"
       - "traefik.http.routers.plex1.rule=Host(`*`)"
