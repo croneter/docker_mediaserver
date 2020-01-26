@@ -125,3 +125,24 @@ Make sure that the user `dockeruser` owns the entire directory (use a user with 
 ```
 sudo chown -R dockeruser:docker <dirname>
 ```
+
+### Power Management
+List current hard drives with `lsblk`. Use [TLP](https://linrunner.de/en/tlp/docs/tlp-linux-advanced-power-management.html):
+```
+sudo apt-get update
+sudo apt install tlp tlp-rdw 
+```
+Show the current configuration of TLP with
+```
+sudo tlp-stat -c
+```
+See [here for configuration options](https://linrunner.de/en/tlp/docs/tlp-configuration.html). E.g change the config to power down the second of a total of 2 hard drives with `sudo nano /etc/default/tlp` and adding
+```
+# Spin down the second of 2 hard disks after 5min
+DISK_SPINDOWN_TIMEOUT_ON_AC="0 60"
+DISK_SPINDOWN_TIMEOUT_ON_BAT="0 60"
+```
+Check whether the hard disk `/dev/sda` is powered down (wait 5 min!) with
+```
+sudo hdparm -C /dev/sda
+```
