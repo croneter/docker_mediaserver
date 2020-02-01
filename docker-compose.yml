@@ -276,7 +276,7 @@ services:
       # Enable iFrames in Organizr
       - "traefik.http.services.bazarr.loadbalancer.passHostHeader=true"
   hydra:
-    image: linuxserver/hydra2:v2.12.2-ls54
+    image: linuxserver/hydra2:latest
     container_name: hydra
     restart: unless-stopped
     environment:
