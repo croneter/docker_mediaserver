@@ -93,18 +93,14 @@ x_frame_options = 0
 ```
 
 ### Setup your domain with plex.tv
-As we're using a reverse proxy, we need to tell Plex where to reach the PMS from outside the LAN. Make sure everything is up and running with `docker-compose up -d`, then grab `Preferences.xml` from the container and safe it to the current working directory:
+As we're using a reverse proxy, we need to tell Plex where to reach the PMS from outside the LAN. Make sure everything is up and running with `docker-compose up -d`, then:
 ```
-docker cp plex:"/config/Library/Application Support/Plex Media Server/Preferences.xml" ./Preferences.xml
+cd ~/config/plex/Library/Application\ Support/Plex\ Media\ Server
+nano Preferences.xml
 ```
-Use `nano` to edit the file and add your domain; use a comma `,` to separate several domains:
+Use `nano` to edit the file and add your custom port:
 ```
-customConnections="http://your-domain.com:32400"
-```
-(see e.g. https://github.com/linuxserver/docker-plex/issues/36)
-Copy the file back:
-```
-docker cp ./Preferences.xml plex:"/config/Library/Application Support/Plex Media Server/Preferences.xml" 
+ManualPortMappingMode="1" ManualPortMappingPort="<YOUR EXTERNAL PLEX PORT"
 ```
 Restart with `docker-compose down` and `docker-compose up -d`.
 
