@@ -3,9 +3,11 @@ version: '3.7'
 services:
   # Our reverse-proxy: https://docs.traefik.io/
   traefik:
-    image: traefik:v2.1.3
+    image: traefik:v2.1.4
     container_name: traefik
     restart: always
+    networks:
+      - traefik
     ports:
       # web
       - "80:80"
@@ -41,8 +43,6 @@ services:
       - "DUCKDNS_TTL=600"
       # Link environment variable with secrets file
       - "DUCKDNS_TOKEN=${DUCKDNS_TOKEN}"
-    secrets:
-      - "userlist"
     volumes:
       # Safe SSL certificates by LetsEncrypt
       - "${CONFIG_DIR}/letsencrypt:/letsencrypt"
@@ -51,7 +51,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
     command:
       # This is the "static traefik configuration"
-      - "--log.level=WARN"
+      - "--log.level=INFO"  # Possible values: DEBUG, INFO, WARN, ERROR
       # Enable docker as provider for traefik. Containers won't automatically connect
       - "--providers.docker.exposedbydefault=false"
       # don't listen in on us, traefik
@@ -73,7 +73,8 @@ services:
       - "--certificatesresolvers.ssl.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
       - "--certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns"
-      # TODO: Comment this for production!
+      # When testing, uncomment this. Letsencrypt only allows a limited number of
+      # requests for certificates
       # - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
     labels:
       # This is the "dynamic traefik configuration" (part of it)
@@ -89,30 +90,97 @@ services:
       - 'traefik.http.routers.wildcard-certs.tls.certresolver=ssl'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].main=${DOMAIN}'
       - 'traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${DOMAIN}'
-      # Authentication
-      - "traefik.http.middlewares.auth.basicAuth.usersFile=/run/secrets/userlist"
-      # Enable SSO for Organizr - the username will be forwarded
-      # See https://github.com/causefx/Organizr/issues/1215
-      - "traefik.http.middlewares.auth.basicAuth.headerField=X-Forwarded-User"
-  # heimdall:
-  #   image: linuxserver/heimdall:latest
-  #   container_name: heimdall
-  #   restart: unless-stopped
-  #   environment:
-  #     - "PUID=${PUID}"
-  #     - "PGID=${PGID}"
-  #     - "TZ=${TZ}"
-  #   volumes:
-  #     - "${CONFIG_DIR}/heimdall:/config"
-  #   labels:
-  #     - "traefik.enable=true"
-  #     - "traefik.http.routers.heimdall.rule=Host(`${DOMAIN}`)"
-  #     - "traefik.http.routers.heimdall.tls=true"
-  #     - "traefik.http.routers.heimdall.middlewares=auth"
+      # Authentication done by our Keycloak container
+      - "traefik.http.middlewares.auth.forwardauth.address=http://forward-auth:4181"
+      - "traefik.http.middlewares.auth.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.auth.forwardauth.authResponseHeaders=X-Forwarded-User"
+  keycloak_db:
+    # Store usernames, passwords, keycloak settings
+    image: postgres:12.1-alpine
+    container_name: keycloak_db
+    restart: unless-stopped
+    networks:
+      - keycloak
+    volumes:
+      - "${CONFIG_DIR}/keycloak_db:/var/lib/postgresql/data"
+    environment:
+      - "POSTGRES_DB=keycloak"
+      - "POSTGRES_USER=keycloak"
+      - "POSTGRES_PASSWORD=password"
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+  keycloak:
+    image: jboss/keycloak:latest
+    container_name: keycloak
+    restart: unless-stopped
+    networks:
+      - traefik
+      - keycloak
+    secrets:
+      - keycloak
+    environment:
+      - "DB_VENDOR=POSTGRES"
+      - "DB_ADDR=keycloak_db"
+      - "DB_PORT=5432"
+      - "DB_DATABASE=keycloak"
+      - "DB_USER=keycloak"
+      - "DB_SCHEMA=public"
+      - "DB_PASSWORD=password"
+      - "KEYCLOAK_USER=${KEYCLOAK_ADMIN_USERNAME}"
+      - "KEYCLOAK_PASSWORD_FILE=/run/secrets/keycloak"
+      - "PROXY_ADDRESS_FORWARDING=true"
+      - "KEYCLOAK_LOGLEVEL=INFO"  # Possible values: DEBUG, INFO, WARN, ERROR
+      # not working yet
+      # - "KEYCLOAK_FRONTEND_URL=keycloak.${DOMAIN}"
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    depends_on:
+      - keycloak_db
+    labels:
+      - "traefik.enable=true"
+      - 'traefik.http.routers.keycloak.entrypoints=websecure'
+      - "traefik.http.routers.keycloak.rule=Host(`keycloak.${DOMAIN}`)"
+      - "traefik.http.routers.keycloak.tls=true"
+      - "traefik.http.services.keycloak.loadbalancer.server.port=8080"
+  forward-auth:
+    image: thomseddon/traefik-forward-auth:2.1
+    container_name: forward-auth
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+      - "LOG_LEVEL=INFO"  # Possible values: TRACE, DEBUG, INFO, WARN, ERROR, FATAL
+      - "DEFAULT_PROVIDER=oidc"
+      - "PROVIDERS_OIDC_CLIENT_ID=${KEYCLOAK_CLIENT_ID}"
+      - "PROVIDERS_OIDC_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}"
+      - "PROVIDERS_OIDC_ISSUER_URL=https://keycloak.${DOMAIN}/auth/realms/${KEYCLOAK_REALM}"
+      - "SECRET=${COOKIE_SECRET}"
+      - "COOKIE_DOMAIN=${DOMAIN}"
+      - "AUTH_HOST=auth.${DOMAIN}"
+    depends_on:
+      - traefik
+      - keycloak
+    labels:
+      - "traefik.enable=true"
+      - 'traefik.http.routers.forward-auth.entrypoints=websecure'
+      - "traefik.http.routers.forward-auth.rule=Host(`auth.${DOMAIN}`)"
+      - "traefik.http.routers.forward-auth.tls=true"
+      - "traefik.http.routers.forward-auth.middlewares=auth"
+      - "traefik.http.services.forward-auth.loadbalancer.server.port=4181"
+  ########################
+  # ACTUAL SERVICES
+  ########################
   organizr:
     image: organizrtools/organizr-v2:latest
     container_name: organizr
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -131,6 +199,8 @@ services:
     image: linuxserver/plex:latest
     container_name: plex
     restart: unless-stopped
+    networks:
+      - traefik
     secrets:
       - "plex_claim"
     environment:
@@ -173,6 +243,8 @@ services:
     image: linuxserver/sabnzbd:latest
     container_name: sabnzbd
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -195,6 +267,8 @@ services:
     image: linuxserver/sonarr:latest
     container_name: sonarr
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -216,6 +290,8 @@ services:
     image: linuxserver/radarr:latest
     container_name: radarr
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -237,6 +313,8 @@ services:
     image: linuxserver/lidarr:latest
     container_name: lidarr
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -258,6 +336,8 @@ services:
     image: linuxserver/bazarr:latest
     container_name: bazarr
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -279,6 +359,8 @@ services:
     image: linuxserver/hydra2:latest
     container_name: hydra
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
@@ -299,11 +381,13 @@ services:
     image: linuxserver/deluge:latest
     container_name: deluge
     restart: unless-stopped
+    networks:
+      - traefik
     environment:
       - "PUID=${PUID}"
       - "PGID=${PGID}"
       - "TZ=${TZ}"
-      - "DELUGE_LOGLEVEL=error"
+      - "DELUGE_LOGLEVEL=INFO"
     volumes:
       - "${CONFIG_DIR}/deluge:/config"
       - "${DOWNLOAD_DIR}/complete:/downloads"
@@ -320,6 +404,8 @@ services:
     image: portainer/portainer:1.23.0
     container_name: portainer
     restart: always
+    networks:
+      - traefik
     environment:
       - "TZ=${TZ}"
     volumes:
@@ -361,7 +447,11 @@ services:
   #     - "traefik.http.services.tdarr.loadbalancer.server.port=8265"
 
 secrets:
-  userlist:
-    file: "./secrets/userlist.txt"
   plex_claim:
     file: "./secrets/plex_claim.txt"
+  keycloak:
+    file: "./secrets/keycload_admin_pwd.txt"
+
+networks:
+  keycloak:
+  traefik:
