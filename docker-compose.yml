@@ -140,6 +140,8 @@ services:
       - keycloak_db
     labels:
       - "traefik.enable=true"
+      # BEWARE: add the project to the network name!
+      - "traefik.docker.network=docker-mediaserver_traefik"
       - 'traefik.http.routers.keycloak.entrypoints=websecure'
       - "traefik.http.routers.keycloak.rule=Host(`keycloak.${DOMAIN}`)"
       - "traefik.http.routers.keycloak.tls=true"
@@ -167,7 +169,7 @@ services:
       - keycloak
     labels:
       - "traefik.enable=true"
-      - 'traefik.http.routers.forward-auth.entrypoints=websecure'
+      - "traefik.http.routers.forward-auth.entrypoints=websecure"
       - "traefik.http.routers.forward-auth.rule=Host(`auth.${DOMAIN}`)"
       - "traefik.http.routers.forward-auth.tls=true"
       - "traefik.http.routers.forward-auth.middlewares=auth"
