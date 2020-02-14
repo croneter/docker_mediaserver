@@ -49,27 +49,20 @@ Set-up your values in the docker environment file:
 cp .env.example .env
 nano .env
 ```
-Set-up your secrets (sensitive stuff you'd NEVER want to leak):
+Set-up your secrets (sensitive stuff you'd NEVER want to leak). Get the Plex claim from [plex.tv/claim](https://www.plex.tv/claim) (claim will only be valid for 5 minutes!!) and paste it into `plex-claim.txt`. Choose any secure password for `keycloak_admin_pwd.txt`.
 ```
 mkdir secrets
-cp plex-secrets.env.example ./secrets/plex-secrets.env
-cp traefik-secrets.env.example ./secrets/traefik-secrets.env
-```
-Then adjust these 2 files as needed with nano:
-```
-nano ./secrets/plex-secrets.env
-nano ./secrets/traefik-secrets.env
+nano ./secrets/plex-claim.txt
+nano ./secrets/keycloak_admin_pwd.txt
 ```
 
-### Add users
-You need to explicitly add users that will be able to login. Let's say you want to add the user `Sherlock` with the password `Holmes`. Get the hashed password like this:
-```
-htpasswd -nb Sherlock Holmes
-```
-Copy the output, e.g. `Sherlock:$apr1$C6xAwK9F$J7ozgti6Z6MccTIGMkJQd.` into a file called `userlist.txt`:
-```
-nano ./secrets/userlist.txt
-```
+### Setting up Keycloak
+On first "boot" of your server, visit `https://keycloak.<yourdomain>`. Use your Keycloak admin credentials to log-in.
+* Create a new realm. Paste that realm's name into `.env` as `KEYCLOAK_REALM`
+* Create a new client for our container `forward-auth`. Set `Access Type` to `Confidential`. Set one `Valid Redirect URIs` to `https://auth.<yourdomain>/_oauth`
+* Copy the `Client ID` and paste it as `KEYCLOAK_CLIENT_ID` in our `.env` file
+* In the Credentials tab, copy the `Secret` and paste it as `KEYCLOAK_CLIENT_SECRET` in our `.env` file. 
+
 
 ## Run everything
 To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
@@ -105,7 +98,7 @@ ManualPortMappingMode="1" ManualPortMappingPort="<YOUR EXTERNAL PLEX PORT"
 Restart with `docker-compose down` and `docker-compose up -d`.
 
 ### Setup Organizr
-Chose a `Personal`-License if you want Radarr, Sonarr, etc. working, i.e. appearing as Homepage options. For Organizr Single Sign On, use an email address as username. Set-up the exact same email address as a user within Organizr.
+Choose a `Personal`-License if you want Radarr, Sonarr, etc. working, i.e. appearing as Homepage options. For Organizr Single Sign On, use an email address as username. Set-up the exact same email address as a user within Organizr.
 
 Choose the following Organizr `Auth Proxy` settings in the Organizr settings:
 * Auth Proxy: On
