@@ -56,19 +56,19 @@ nano ./secrets/plex-claim.txt
 nano ./secrets/keycloak_admin_pwd.txt
 ```
 
+## Run everything
+To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
+```
+docker-compose up -d
+```
+
 ### Setting up Keycloak
 On first "boot" of your server, visit `https://keycloak.<yourdomain>`. Use your Keycloak admin credentials to log-in.
 * Create a new realm. Paste that realm's name into `.env` as `KEYCLOAK_REALM`
 * Create a new client for our container `forward-auth`. Set `Access Type` to `Confidential`. Set one `Valid Redirect URIs` to `https://auth.<yourdomain>/_oauth`
 * Copy the `Client ID` and paste it as `KEYCLOAK_CLIENT_ID` in our `.env` file
 * In the Credentials tab, copy the `Secret` and paste it as `KEYCLOAK_CLIENT_SECRET` in our `.env` file. 
-
-
-## Run everything
-To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
-```
-docker-compose up -d
-```
+* Reboot your server with `docker-compose down`, then `docker-compose up`
 
 ### Configure SABNZBD once
 Add your domain to whitelist. Navigate to your chosen `config_dir`, then
