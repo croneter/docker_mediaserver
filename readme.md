@@ -109,7 +109,7 @@ Chose a `Personal`-License if you want Radarr, Sonarr, etc. working, i.e. appear
 
 Choose the following Organizr `Auth Proxy` settings in the Organizr settings:
 * Auth Proxy: On
-* Auth Proxy Whitelist: `0.0.0.0/0` (behind Traefik anyway)
+* Auth Proxy Whitelist: `172.28.0.0/16`
 * Auth Proxy Header Name: `X-Forwarded-User`
 
 When adding tabs, use the following setup:
