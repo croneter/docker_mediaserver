@@ -52,6 +52,7 @@ services:
     command:
       # This is the "static traefik configuration"
       - "--log.level=INFO"  # Possible values: DEBUG, INFO, WARN, ERROR
+      - "--api.dashboard=true"
       # Enable docker as provider for traefik. Containers won't automatically connect
       - "--providers.docker.exposedbydefault=false"
       # don't listen in on us, traefik
@@ -79,6 +80,11 @@ services:
     labels:
       # This is the "dynamic traefik configuration" (part of it)
       - "traefik.enable=true"
+      # Traefik dashboard
+      - "traefik.http.routers.api.rule=Host(`traefik.${DOMAIN}`)"
+      - "traefik.http.routers.api.tls=true"
+      - "traefik.http.routers.api.middlewares=auth"
+      - "traefik.http.routers.api.service=api@internal"
       # global redirect to https
       - "traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.redirs.entrypoints=web"
