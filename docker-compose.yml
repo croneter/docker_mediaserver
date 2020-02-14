@@ -436,7 +436,7 @@ secrets:
   plex_claim:
     file: "./secrets/plex_claim.txt"
   keycloak:
-    file: "./secrets/keycload_admin_pwd.txt"
+    file: "./secrets/keycloak_admin_pwd.txt"
 
 networks:
   keycloak:
