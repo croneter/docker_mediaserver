@@ -170,6 +170,8 @@ services:
       - "SECRET=${COOKIE_SECRET}"
       - "COOKIE_DOMAIN=${DOMAIN}"
       - "AUTH_HOST=auth.${DOMAIN}"
+      # Lifetime of the cookie in seconds, 30 days
+      - "LIFETIME=2592000"
     depends_on:
       - traefik
       - keycloak
