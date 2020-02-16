@@ -395,7 +395,7 @@ services:
       - "traefik.http.routers.deluge.middlewares=auth"
       - "traefik.http.services.deluge.loadbalancer.server.port=8112"
   portainer:
-    image: portainer/portainer:1.23.0
+    image: portainer/portainer:latest
     container_name: portainer
     restart: always
     networks:
