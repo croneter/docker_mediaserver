@@ -250,6 +250,25 @@ services:
       - "traefik.http.routers.plex7.rule=Host(`*`)"
       - "traefik.http.routers.plex8.entrypoints=plex8"
       - "traefik.http.routers.plex8.rule=Host(`*`)"
+  ombi:
+    image: linuxserver/ombi:latest
+    container_name: ombi
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - "PUID=${PUID}"
+      - "PGID=${PGID}"
+      - "TZ=${TZ}"
+    volumes:
+      - "${CONFIG_DIR}/ombi:/config"
+    labels:
+      - "traefik.enable=true"
+      - 'traefik.http.routers.ombi.entrypoints=websecure'
+      - "traefik.http.routers.ombi.rule=Host(`ombi.${DOMAIN}`)"
+      - "traefik.http.routers.ombi.tls=true"
+      - "traefik.http.routers.ombi.middlewares=auth"
+      - "traefik.http.services.ombi.loadbalancer.server.port=3579"
   sabnzbd:
     image: linuxserver/sabnzbd:latest
     container_name: sabnzbd
