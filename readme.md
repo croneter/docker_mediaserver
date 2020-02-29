@@ -135,3 +135,19 @@ Check whether the hard disk `/dev/sda` is powered down (wait 5 min!) with
 ```
 sudo hdparm -C /dev/sda
 ```
+
+### Get Pi-Hole to work
+
+See https://www.smarthomebeginner.com/run-pihole-in-docker-on-ubuntu-with-reverse-proxy/. 
+
+Create empty files before starting docker, otherwise empty directories instead of files are created. 
+```
+cd ~/config
+mkdir pihole
+mkdir pihole/log
+touch ~/config/pihole/log/pihole.log
+```
+Pihole uses the user `root`: Log in as root, then
+```
+sudo chown -R root:root /home/dockeruser/config/pihole
+```
