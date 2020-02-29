@@ -25,6 +25,12 @@ services:
       - "32413:32413"  # for current GDM network discovery
       - "32414:32414"  # for current GDM network discovery
       - "32469:32469"  # for access to the Plex DLNA Server
+      # Todo: route Pihole once traefik handels udp
+      # - "53:53/udp"
+      # - "53:53/tcp"
+      # - '67:67/udp'  # Needed for pihole DHCP server
+      - "8182:8182"
+      - "8183:8183"
       # Only for development purposes! Traefik dashboard
       # - 8080:8080
     environment:
@@ -70,6 +76,10 @@ services:
       - "--entrypoints.plex6.address=:32413"
       - "--entrypoints.plex7.address=:32414"
       - "--entrypoints.plex8.address=:32469"
+      # Pihole
+      # - "--entrypoints.pihole0.address=:53"
+      - "--entrypoints.pihole1.address=:8182"
+      - "--entrypoints.pihole2.address=:8183"
       # letsencrypt SSL certificates ("acme")
       - "--certificatesresolvers.ssl.acme.email=${LETSENCRYPT_EMAIL}"
       - "--certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json"
@@ -186,6 +196,63 @@ services:
   ########################
   # ACTUAL SERVICES
   ########################
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: unless-stopped
+    networks:
+      - traefik
+    volumes:
+      - "${CONFIG_DIR}/pihole:/etc/pihole"
+      - "${CONFIG_DIR}/pihole/log/pihole.log:/var/log/pihole.log"
+      - "${CONFIG_DIR}/pihole/etc/dnsmasq.d:/etc/dnsmasq.d"
+      # allow iFrames even after container-update
+      # ("X-Frame-Options" in /etc/lighttpd/lighttpd.conf)
+      # See https://github.com/pi-hole/docker-pi-hole/issues/327
+      - "./pihole-allow-iframe.sh:/etc/cont-init.d/21-allow-iframe.sh"
+    environment:
+      - "TZ=${TZ}"
+      - "ServerIP=${LAN_SERVER_IP}"
+      - "VIRTUAL_HOST=pihole.${DOMAIN}"
+      # Don't set a password - we don't need one
+      - "WEBPASSWORD="
+      # Use Cloudflare DNS
+      - "DNS1=127.0.0.1"
+      - "DNS2=1.1.1.1"
+    ports:
+      - "53:53/udp"
+      - "53:53/tcp"
+    dns:
+      # Pihole: "first dns must be 127.0.0.1"
+      - "127.0.0.1"
+      # Use Cloudflare DNS
+      - "1.1.1.1"
+      - "1.0.0.1"
+    labels:
+      - "traefik.enable=true"
+      # Port 53 as-is
+      # - "traefik.http.routers.pihole0.entrypoints=pihole0"
+      # - "traefik.http.routers.pihole0.rule=Host(`*`)"
+      # - "traefik.http.routers.pihole0.service=pihole0"
+      # - "traefik.http.services.pihole0.loadbalancer.server.port=53"
+      # Port 8182 as-is mapped to 80
+      - "traefik.http.routers.pihole1.entrypoints=pihole1"
+      - "traefik.http.routers.pihole1.rule=Host(`*`)"
+      - "traefik.http.routers.pihole1.service=pihole1"
+      - "traefik.http.services.pihole1.loadbalancer.server.port=80"
+      # Port 8183 as-is mapped to 443
+      - "traefik.http.routers.pihole2.entrypoints=pihole2"
+      - "traefik.http.routers.pihole2.rule=Host(`*`)"
+      - "traefik.http.routers.pihole2.service=pihole2"
+      - "traefik.http.services.pihole2.loadbalancer.server.port=443"
+      # Admin console for pihole - need to hit %/admin
+      - 'traefik.http.routers.pihole3.entrypoints=websecure'
+      - "traefik.http.routers.pihole3.rule=Host(`pihole.${DOMAIN}`)"
+      - "traefik.http.routers.pihole3.tls=true"
+      - "traefik.http.routers.pihole3.middlewares=auth,pihole-addprefix"
+      - "traefik.http.routers.pihole3.service=pihole3"
+      - "traefik.http.middlewares.pihole-addprefix.addPrefix.prefix=/admin"
+      - "traefik.http.services.pihole3.loadbalancer.server.port=80"
   organizr:
     image: organizrtools/organizr-v2:latest
     container_name: organizr
