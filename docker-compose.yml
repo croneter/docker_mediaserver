@@ -3,7 +3,7 @@ version: '3.7'
 services:
   # Our reverse-proxy: https://docs.traefik.io/
   traefik:
-    image: traefik:v2.1.4
+    image: traefik:v2.1.6
     container_name: traefik
     restart: always
     networks:
