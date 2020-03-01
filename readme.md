@@ -138,6 +138,17 @@ sudo hdparm -C /dev/sda
 
 ### Get Pi-Hole to work
 
+#### Build DNS over HTTPS image
+In the `dns-over-https` directory, do
+```
+docker build -t dns-over-https .
+```
+Then
+```
+docker tag dns-over-https:latest dns-over-https:staging
+```
+
+#### Rest
 See https://www.smarthomebeginner.com/run-pihole-in-docker-on-ubuntu-with-reverse-proxy/. 
 
 Create empty files before starting docker, otherwise empty directories instead of files are created. 
@@ -151,3 +162,4 @@ Pihole uses the user `root`: Log in as root, then
 ```
 sudo chown -R root:root /home/dockeruser/config/pihole
 ```
+In Pi-Hole, set `172.29.0.2#5053` as upstream DNS.
