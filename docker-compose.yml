@@ -209,7 +209,7 @@ services:
       # allow iFrames even after container-update
       # ("X-Frame-Options" in /etc/lighttpd/lighttpd.conf)
       # See https://github.com/pi-hole/docker-pi-hole/issues/327
-      - "./pihole-allow-iframe.sh:/etc/cont-init.d/21-allow-iframe.sh"
+      - "./pihole/allow-iframe.sh:/etc/cont-init.d/21-allow-iframe.sh"
     environment:
       - "TZ=${TZ}"
       - "ServerIP=${LAN_SERVER_IP}"
