@@ -45,7 +45,7 @@ services:
       - "127.0.0.1"
     labels:
       - traefik.enable=true
-      - traefik.docker.network=docker-mediaserver_traefik
+      - traefik.docker.network=traefik
       # Port 53 as-is
       # - traefik.http.routers.pihole0.entrypoints=pihole0
       # - traefik.http.routers.pihole0.rule=Host(`*`)

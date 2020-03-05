@@ -139,7 +139,7 @@ services:
     labels:
       - traefik.enable=true
       # BEWARE: add the project to the network name!
-      - traefik.docker.network=docker-mediaserver_traefik
+      - traefik.docker.network=traefik
       - traefik.http.routers.keycloak.entrypoints=websecure
       - traefik.http.routers.keycloak.rule=Host(`keycloak.${DOMAIN}`)
       - traefik.http.routers.keycloak.tls=true
