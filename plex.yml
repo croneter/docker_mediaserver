@@ -1,0 +1,49 @@
+version: "3.7"
+
+services:
+  plex:
+    image: linuxserver/plex:latest
+    container_name: plex
+    restart: unless-stopped
+    networks:
+      - traefik
+    ports:
+      # Do NOT forward these following ports on your router - they're LAN only
+      - 1900:1900  # for access to the Plex DLNA Server
+      - 3005:3005  # for controlling Plex Home Theater via Plex Companion
+      # - 5353:5353/udp  # for older Bonjour/Avahi network discovery)
+      - 8324:8324  # for controlling Plex for Roku via Plex Companion
+      - 32410:32410  # for current GDM network discovery
+      - 32412:32412  # for current GDM network discovery
+      - 32413:32413  # for current GDM network discovery
+      - 32414:32414  # for current GDM network discovery
+      - 32469:32469  # for access to the Plex DLNA Server
+    secrets:
+      - plex_claim
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - ADVERTISE_IP=http://${DOMAIN}:${PLEX_ADVERTISE_PORT}
+      # Link environment variable with secrets file
+      - PLEX_CLAIM_FILE='/run/secrets/plex_claim'
+    volumes:
+      - "${CONFIG_DIR}/plex:/config"
+      - "${MOVIE_DIR}:/movies"
+      - "${SHOW_DIR}:/shows"
+      - "${MUSIC_DIR}:/music"
+    labels:
+      - traefik.enable=true
+      # Main Plex port, remapped to port 32400
+      - traefik.tcp.routers.plex.entrypoints=plex
+      - traefik.tcp.routers.plex.rule=HostSNI(`*`)
+      - traefik.tcp.routers.plex.tls.passthrough=true
+      - traefik.tcp.services.plex.loadbalancer.server.port=32400
+
+secrets:
+  plex_claim:
+    file: ./secrets/plex_claim.txt
+
+networks:
+  traefik:
+    external: true

@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  lidarr:
+    image: linuxserver/lidarr:latest
+    container_name: lidarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${CONFIG_DIR}/lidarr:/config"
+      - "${MUSIC_DIR}:/music"
+      - "${DOWNLOAD_DIR}:/downloads"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.lidarr.entrypoints=websecure
+      - traefik.http.routers.lidarr.rule=Host(`lidarr.${DOMAIN}`)
+      - traefik.http.routers.lidarr.tls=true
+      - traefik.http.routers.lidarr.middlewares=auth
+      - traefik.http.services.lidarr.loadbalancer.server.port=8686
+
+networks:
+  traefik:
+    external: true

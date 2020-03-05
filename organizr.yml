@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+  organizr:
+    image: organizrtools/organizr-v2:latest
+    container_name: organizr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${CONFIG_DIR}/organizr:/config"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.organizr.entrypoints=websecure
+      - traefik.http.routers.organizr.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.organizr.tls=true
+      - traefik.http.routers.organizr.middlewares=auth
+
+networks:
+  traefik:
+    external: true

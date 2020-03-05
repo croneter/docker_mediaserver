@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  sonarr:
+    image: linuxserver/sonarr:latest
+    container_name: sonarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${CONFIG_DIR}/sonarr:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+      - "${SHOW_DIR}:/tv"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.sonarr.entrypoints=websecure
+      - traefik.http.routers.sonarr.rule=Host(`sonarr.${DOMAIN}`)
+      - traefik.http.routers.sonarr.tls=true
+      - traefik.http.routers.sonarr.middlewares=auth
+      - traefik.http.services.sonarr.loadbalancer.server.port=8989
+
+networks:
+  traefik:
+    external: true

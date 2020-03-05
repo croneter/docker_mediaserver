@@ -1,0 +1,29 @@
+version: "3.7"
+
+services:
+  portainer:
+    image: portainer/portainer:latest
+    container_name: portainer
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "${CONFIG_DIR}/portainer:/data"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.portainer.entrypoints=websecure
+      - traefik.http.routers.portainer.rule=Host(`portainer.${DOMAIN}`)
+      - traefik.http.routers.portainer.tls=true
+      - traefik.http.routers.portainer.middlewares=auth
+      - traefik.http.services.portainer.loadbalancer.server.port=9000
+    command:
+      # portainer clashes with traefik basic auth's header Authorization
+      # Plus we're using traefik for auth
+      - --no-auth
+
+networks:
+  traefik:
+    external: true

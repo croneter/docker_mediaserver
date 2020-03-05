@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  hydra:
+    image: linuxserver/hydra2:latest
+    container_name: hydra
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${CONFIG_DIR}/hydra2:/config"
+      - "${DOWNLOAD_DIR}/watch:/downloads"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.hydra.entrypoints=websecure
+      - traefik.http.routers.hydra.rule=Host(`hydra.${DOMAIN}`)
+      - traefik.http.routers.hydra.tls=true
+      - traefik.http.routers.hydra.middlewares=auth
+      - traefik.http.services.hydra.loadbalancer.server.port=5076
+
+networks:
+  traefik:
+    external: true

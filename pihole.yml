@@ -1,0 +1,80 @@
+version: "3.7"
+
+services:
+  dns-over-https:
+    image: dns-over-https:staging
+    container_name: dns-over-https
+    restart: unless-stopped
+    networks:
+      pihole:
+        ipv4_address: "172.29.0.2"
+    environment:
+      - TZ=${TZ}
+      - TUNNEL_DNS_UPSTREAM=https://1.1.1.1/dns-query,https://1.0.0.1/dns-query
+    ports:
+      - 5053:5053/udp
+  pihole:
+    image: pihole/pihole:latest
+    container_name: pihole
+    restart: unless-stopped
+    networks:
+      pihole:
+        ipv4_address: "172.29.0.3"
+      traefik:
+    volumes:
+      - "${CONFIG_DIR}/pihole:/etc/pihole"
+      - "${CONFIG_DIR}/pihole/log/pihole.log:/var/log/pihole.log"
+      - "${CONFIG_DIR}/pihole/etc/dnsmasq.d:/etc/dnsmasq.d"
+      # allow iFrames even after container-update
+      # (X-Frame-Options in /etc/lighttpd/lighttpd.conf)
+      # See https://github.com/pi-hole/docker-pi-hole/issues/327
+      - ./pihole/allow-iframe.sh:/etc/cont-init.d/21-allow-iframe.sh
+    environment:
+      - TZ=${TZ}
+      - ServerIP=${LAN_SERVER_IP}
+      - VIRTUAL_HOST=pihole.${DOMAIN}
+      # Don't set a password - we don't need one
+      - WEBPASSWORD=
+      # Use Cloudflare DNS vis dns-over-https
+      - DNS1=172.29.0.2#5053
+    ports:
+      - 53:53/udp
+      - 53:53/tcp
+    dns:
+      # Pihole: first dns must be 127.0.0.1
+      - "127.0.0.1"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=docker-mediaserver_traefik
+      # Port 53 as-is
+      # - traefik.http.routers.pihole0.entrypoints=pihole0
+      # - traefik.http.routers.pihole0.rule=Host(`*`)
+      # - traefik.http.routers.pihole0.service=pihole0
+      # - traefik.http.services.pihole0.loadbalancer.server.port=53
+      # Port 8182 as-is mapped to 80
+      - traefik.http.routers.pihole1.entrypoints=pihole1
+      - traefik.http.routers.pihole1.rule=Host(`*`)
+      - traefik.http.routers.pihole1.service=pihole1
+      - traefik.http.services.pihole1.loadbalancer.server.port=80
+      # Port 8183 as-is mapped to 443
+      - traefik.http.routers.pihole2.entrypoints=pihole2
+      - traefik.http.routers.pihole2.rule=Host(`*`)
+      - traefik.http.routers.pihole2.service=pihole2
+      - traefik.http.services.pihole2.loadbalancer.server.port=443
+      # Admin console for pihole - need to hit %/admin
+      - 'traefik.http.routers.pihole3.entrypoints=websecure'
+      - traefik.http.routers.pihole3.rule=Host(`pihole.${DOMAIN}`)
+      - traefik.http.routers.pihole3.tls=true
+      - traefik.http.routers.pihole3.middlewares=auth,pihole-addprefix
+      - traefik.http.routers.pihole3.service=pihole3
+      - traefik.http.middlewares.pihole-addprefix.addPrefix.prefix=/admin
+      - traefik.http.services.pihole3.loadbalancer.server.port=80
+
+networks:
+  traefik:
+    external: true
+  pihole:
+    ipam:
+      driver: "default"
+      config:
+        - subnet: "172.29.0.0/16"

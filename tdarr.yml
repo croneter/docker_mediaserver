@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  # TODO: check back once a Sonarr/Radarr integration exists
+  tdarr:
+    # Post-Processing, health checks, re-encoding, etc.
+    image: haveagitgat/tdarr_aio:latest
+    container_name: tdarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - "${CONFIG_DIR}/tdarr:/var/lib/mongodb"
+      - "${CONFIG_DIR}/tdarr-cache:/cache"
+      - "${MOVIE_DIR}:/home/Tdarr/Media/movies"
+      - "${SHOW_DIR}:/home/Tdarr/Media/shows"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.tdarr.entrypoints=websecure
+      - traefik.http.routers.tdarr.rule=Host(`tdarr.${DOMAIN}`)
+      - traefik.http.routers.tdarr.tls=true
+      - traefik.http.routers.tdarr.middlewares=auth
+      - traefik.http.services.tdarr.loadbalancer.server.port=8265
+
+networks:
+  traefik:
+    external: true

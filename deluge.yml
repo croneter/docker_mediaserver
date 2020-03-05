@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  deluge:
+    image: linuxserver/deluge:latest
+    container_name: deluge
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DELUGE_LOGLEVEL=INFO
+    volumes:
+      - "${CONFIG_DIR}/deluge:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.deluge.entrypoints=websecure
+      - traefik.http.routers.deluge.rule=Host(`deluge.${DOMAIN}`)
+      - traefik.http.routers.deluge.tls=true
+      - traefik.http.routers.deluge.middlewares=auth
+      - traefik.http.services.deluge.loadbalancer.server.port=8112
+
+networks:
+  traefik:
+    external: true

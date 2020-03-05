@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  radarr:
+    image: linuxserver/radarr:latest
+    container_name: radarr
+    restart: unless-stopped
+    networks:
+      - traefik
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${CONFIG_DIR}/radarr:/config"
+      - "${DOWNLOAD_DIR}/complete:/downloads"
+      - "${MOVIE_DIR}:/movies"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.radarr.entrypoints=websecure
+      - traefik.http.routers.radarr.rule=Host(`radarr.${DOMAIN}`)
+      - traefik.http.routers.radarr.tls=true
+      - traefik.http.routers.radarr.middlewares=auth
+      - traefik.http.services.radarr.loadbalancer.server.port=7878
+
+networks:
+  traefik:
+    external: true

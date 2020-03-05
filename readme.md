@@ -57,6 +57,10 @@ nano ./secrets/keycloak_admin_pwd.txt
 ```
 
 ## Run everything
+Start the network with
+```
+docker network create --ipam-driver "default" --subnet "172.28.0.0/16" traefik
+```
 To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
 ```
 docker-compose up -d
