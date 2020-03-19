@@ -1,0 +1,50 @@
+version: "3.7"
+
+services:
+  plex:
+    image: linuxserver/plex:latest
+    networks:
+      - overlay_network
+    secrets:
+      - plex_claim
+    ports:
+      # Main Plex port - forward HTPC_PLEX_ADVERTISE_PORT on your router!
+      - ${HTPC_PLEX_ADVERTISE_PORT}:32400
+      # Do NOT forward these following ports on your router - they're LAN only
+      - 1900:1900  # for access to the Plex DLNA Server
+      - 3005:3005  # for controlling Plex Home Theater via Plex Companion
+      # - 5353:5353/udp  # for older Bonjour/Avahi network discovery)
+      - 8324:8324  # for controlling Plex for Roku via Plex Companion
+      - 32410:32410  # for current GDM network discovery
+      - 32412:32412  # for current GDM network discovery
+      - 32413:32413  # for current GDM network discovery
+      - 32414:32414  # for current GDM network discovery
+      - 32469:32469  # for access to the Plex DLNA Server
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - FILE__PLEX_CLAIM=/run/secrets/plex_claim
+    volumes:
+      - "${HTPC_CONFIG_DIR}/plex:/config"
+      - "${HTPC_MOVIE_DIR}:/movies"
+      - "${HTPC_SHOW_DIR}:/shows"
+      - "${HTPC_MUSIC_DIR}:/music"
+      - "${HTPC_PICTURE_DIR}:/pictures"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:32400/identity"]
+      interval: 2m
+      timeout: 10s
+      retries: 3
+      start_period: 3m
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+secrets:
+  plex_claim:
+    file: ./secrets/plex_claim.txt
+
+networks:
+  overlay_network:
+    external: true

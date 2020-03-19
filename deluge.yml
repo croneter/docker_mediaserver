@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  deluge:
+    image: linuxserver/deluge:latest
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DELUGE_LOGLEVEL=INFO
+    volumes:
+      - "${HTPC_CONFIG_DIR}/deluge:/config"
+      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8112"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.deluge.entrypoints=websecure
+        - traefik.http.routers.deluge.rule=Host(`deluge.${HTPC_DOMAIN}`)
+        - traefik.http.routers.deluge.tls=true
+        - traefik.http.routers.deluge.middlewares=auth
+        - traefik.http.services.deluge.loadbalancer.server.port=8112
+
+networks:
+  overlay_network:
+    external: true

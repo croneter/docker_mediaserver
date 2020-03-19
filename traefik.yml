@@ -1,0 +1,108 @@
+version: "3.7"
+
+services:
+  traefik:
+    image: traefik:v2.1.6
+    networks:
+      - overlay_network
+    ports:
+      # web
+      - 80:80
+      # websecure
+      - 443:443
+    secrets:
+      - duckdns_token
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - DUCKDNS_TOKEN_FILE=/run/secrets/duckdns_token
+      # See https://go-acme.github.io/lego/dns/duckdns/
+      # and
+      # https://github.com/go-acme/lego/issues/967
+      # API request timeout
+      - DUCKDNS_HTTP_TIMEOUT=30
+      # Maximum waiting time for DNS propagation
+      - DUCKDNS_PROPAGATION_TIMEOUT=600
+      # Time between DNS propagation check
+      - DUCKDNS_POLLING_INTERVAL=16
+      # The TTL of the TXT record used for the DNS challenge
+      - DUCKDNS_TTL=600
+    volumes:
+      # Safe SSL certificates by LetsEncrypt
+      - "${HTPC_CONFIG_DIR}/letsencrypt:/letsencrypt"
+      # So that Traefik can listen to the Docker events
+      # Potential security risk, see https://github.com/containous/traefik/issues/4174
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      # This is the "static traefik configuration"
+      - --log.level=INFO  # Possible values: DEBUG, INFO, WARN, ERROR
+      - --api.dashboard=true
+      - --ping
+      # Enable docker as provider for traefik in Docker Swarm mode. 
+      - --providers.docker.swarmMode=true
+      # Containers won't automatically connect
+      - --providers.docker.exposedbydefault=false
+      # don't listen in on us, traefik
+      - --global.sendanonymoususage=false
+      # Entrypoints to our infrastructure
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      # letsencrypt SSL certificates ("acme")
+      - "--certificatesresolvers.ssl.acme.email=${HTPC_LETSENCRYPT_EMAIL}"
+      - --certificatesresolvers.ssl.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.ssl.acme.dnschallenge.provider=duckdns
+      # When testing, uncomment this. Letsencrypt only allows a limited number of
+      # requests for certificates
+      # - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    healthcheck:
+      test: traefik healthcheck --ping
+    deploy:
+      # Global mode makes an instance of traefik listen on _every_ node, so that
+      # regardless of which # node the request arrives on, it'll be forwarded to
+      # the correct backend service.
+      mode: global
+      placement:
+        constraints:
+          - node.role == manager
+      restart_policy:
+        condition: on-failure
+      labels:
+        # This is the "dynamic traefik configuration" (part of it)
+        - traefik.enable=true
+        # Traefik dashboard
+        - traefik.http.routers.api.entrypoints=websecure
+        - traefik.http.routers.api.rule=Host(`traefik.${HTPC_DOMAIN}`)
+        - traefik.http.routers.api.tls=true
+        - traefik.http.routers.api.middlewares=auth
+        - traefik.http.routers.api.service=api@internal
+        # See https://github.com/containous/traefik/issues/5732
+        - traefik.http.services.api-dummyService.loadbalancer.server.port=9999
+        # global redirect to https
+        - traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.redirs.entrypoints=web
+        - traefik.http.routers.redirs.middlewares=redirect-to-https
+        - traefik.http.routers.redirs.service=redirs
+        - traefik.http.middlewares.redirect-to-https.redirectScheme.scheme=https
+        - traefik.http.services.redirs.loadbalancer.server.port=443
+        # global wildcard certificates
+        # See https://github.com/containous/traefik/issues/5317
+        - traefik.http.routers.wildcard-certs.entrypoints=websecure
+        - traefik.http.routers.wildcard-certs.tls.certresolver=ssl
+        - traefik.http.routers.wildcard-certs.tls.domains[0].main=${HTPC_DOMAIN}
+        - traefik.http.routers.wildcard-certs.tls.domains[0].sans=*.${HTPC_DOMAIN}
+        - traefik.http.routers.wildcard-certs.service=wildcard-certs-dummyService
+        - traefik.http.services.wildcard-certs-dummyService.loadbalancer.server.port=9999
+        # Authentication done by our Keycloak container
+        - traefik.http.middlewares.auth.forwardauth.address=http://forward-auth:4181
+        - traefik.http.middlewares.auth.forwardauth.trustForwardHeader=true
+        - traefik.http.middlewares.auth.forwardauth.authResponseHeaders=X-Forwarded-User
+        - traefik.http.services.auth-dummyService.loadbalancer.server.port=9999
+
+secrets:
+  duckdns_token:
+    file: ./secrets/duckdns_token.txt
+
+networks:
+  overlay_network:
+    external: true

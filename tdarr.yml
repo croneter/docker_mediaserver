@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  tdarr:
+    # Post-Processing, health checks,   re-encoding, etc.
+    image: haveagitgat/tdarr_aio:latest
+    networks:
+      - overlay_network
+    environment:
+      - TZ=${TZ}
+      - PUID=${PUID}
+      - PGID=${PGID}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/tdarr:/var/lib/mongodb"
+      - "${HTPC_MOVIE_DIR}:/home/Tdarr/Media/movies"
+      - "${HTPC_SHOW_DIR}:/home/Tdarr/Media/shows"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8265"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.tdarr.rule=Host(`tdarr.${HTPC_DOMAIN}`)
+        - traefik.http.routers.tdarr.tls=true
+        - traefik.http.routers.tdarr.middlewares=auth
+        - traefik.http.services.tdarr.loadbalancer.server.port=8265
+
+networks:
+  overlay_network:
+    external: true
