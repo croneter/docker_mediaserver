@@ -143,6 +143,18 @@ When adding tabs, use the following setup:
 * Type: `iFrame`
 * Tab Url: https://<service>.croneter-test.duckdns.org
 
+### Custom Lidarr
+Lidarr is customized to enable you to automatically convert FLAC to MP3. Build (or later upgrade) the `lidarr` Docker image with:
+```
+docker build -t lidarr .
+```
+To enable automatic conversation, customize Lidarr:
+* Navigate to Settings -> Connection
+* Create a new Custom Connection
+* For the path, add `/usr/local/bin/flac2mp3.sh`. Only select
+  * "On Release Import"
+  * "On Upgrade"
+
 ### Permissions off for writing/accessing a directory?
 Make sure that the user `dockeruser` owns the entire directory (use a user with sudo-rights):
 ```

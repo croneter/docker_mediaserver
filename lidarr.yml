@@ -2,7 +2,8 @@ version: "3.7"
 
 services:
   lidarr:
-    image: linuxserver/lidarr:latest
+    # image: linuxserver/lidarr:latest
+    image: lidarr
     networks:
       - overlay_network
     environment:
