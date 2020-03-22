@@ -1,0 +1,85 @@
+version: "3.7"
+
+services:
+  keycloak_db:
+    image: postgres:12.1-alpine
+    networks:
+      - keycloak
+    volumes:
+      - "${HTPC_CONFIG_DIR}/keycloak_db:/var/lib/postgresql/data"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+  keycloak:
+    image: jboss/keycloak:latest
+    networks:
+      - overlay_network
+      - keycloak
+    secrets:
+      - keycloak_admin_password
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    env_file:
+      - keycloak.env
+    depends_on:
+      - keycloak_db
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        # BEWARE: add the project to the network name!
+        - traefik.docker.network=overlay_network
+        - traefik.http.routers.keycloak.entrypoints=websecure
+        - traefik.http.routers.keycloak.rule=Host(`keycloak.${HTPC_DOMAIN}`)
+        - traefik.http.routers.keycloak.tls=true
+        - traefik.http.services.keycloak.loadbalancer.server.port=8080
+  forward-auth:
+    image: thomseddon/traefik-forward-auth:2.1
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PROVIDERS_OIDC_ISSUER_URL=https://keycloak.${HTPC_DOMAIN}/auth/realms/${HTPC_KEYCLOAK_REALM}
+      - COOKIE_DOMAIN=${HTPC_DOMAIN}
+      - AUTH_HOST=auth.${HTPC_DOMAIN}
+    env_file:
+      - forward-auth.env
+    depends_on:
+      - keycloak
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.forward-auth.entrypoints=websecure
+        - traefik.http.routers.forward-auth.rule=Host(`auth.${HTPC_DOMAIN}`)
+        - traefik.http.routers.forward-auth.tls=true
+        - traefik.http.routers.forward-auth.middlewares=auth
+        - traefik.http.services.forward-auth.loadbalancer.server.port=4181
+
+secrets:
+  keycloak_admin_password:
+    external: true
+
+networks:
+  keycloak:
+  overlay_network:
+    external: true

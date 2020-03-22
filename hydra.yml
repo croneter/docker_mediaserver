@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  hydra:
+    image: linuxserver/hydra2:latest
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/hydra2:/config"
+      - "${HTPC_DOWNLOAD_DIR}/watch:/downloads"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5076"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.hydra.entrypoints=websecure
+        - traefik.http.routers.hydra.rule=Host(`hydra.${HTPC_DOMAIN}`)
+        - traefik.http.routers.hydra.tls=true
+        - traefik.http.routers.hydra.middlewares=auth
+        - traefik.http.services.hydra.loadbalancer.server.port=5076
+
+networks:
+  overlay_network:
+    external: true

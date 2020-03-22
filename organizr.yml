@@ -1,0 +1,27 @@
+version: "3.7"
+
+services:
+  organizr:
+    image: organizrtools/organizr-v2:latest
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/organizr:/config"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.organizr.entrypoints=websecure
+        - traefik.http.routers.organizr.rule=Host(`${HTPC_DOMAIN}`)
+        - traefik.http.routers.organizr.tls=true
+        - traefik.http.routers.organizr.middlewares=auth
+        - traefik.http.services.organizr.loadbalancer.server.port=80
+
+networks:
+  overlay_network:
+    external: true

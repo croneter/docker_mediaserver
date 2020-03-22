@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  bazarr:
+    image: linuxserver/bazarr:latest
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/bazarr:/config"
+      - "${HTPC_MOVIE_DIR}:/movies"
+      - "${HTPC_SHOW_DIR}:/tv"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6767"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.bazarr.entrypoints=websecure
+        - traefik.http.routers.bazarr.rule=Host(`bazarr.${HTPC_DOMAIN}`)
+        - traefik.http.routers.bazarr.tls=true
+        - traefik.http.routers.bazarr.middlewares=auth
+        - traefik.http.services.bazarr.loadbalancer.server.port=6767
+
+networks:
+  overlay_network:
+    external: true

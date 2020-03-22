@@ -1,0 +1,53 @@
+version: "3.7"
+
+services:
+  agent:
+    image: portainer/agent:latest
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - portainer_agent
+    # TODO: Add healthcheck (curl not available within container)
+    deploy:
+      mode: global
+      placement:
+        constraints: [node.platform.os == linux]
+  portainer:
+    image: portainer/portainer:latest
+    # portainer clashes with traefik basic auth's header "Authorization"
+    # Plus we're using traefik for auth
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    networks:
+      - portainer_agent
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "${HTPC_CONFIG_DIR}/portainer:/data"
+    # TODO: Add healthcheck (curl not available within container)
+    deploy:
+      restart_policy:
+        condition: on-failure
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints: [node.role == manager]
+      labels:
+        - traefik.enable=true
+        - traefik.docker.network=overlay_network
+        - traefik.http.routers.portainer.entrypoints=websecure
+        - traefik.http.routers.portainer.rule=Host(`portainer.${HTPC_DOMAIN}`)
+        - traefik.http.routers.portainer.tls=true
+        - traefik.http.routers.portainer.middlewares=auth
+        - traefik.http.services.portainer.loadbalancer.server.port=9000
+
+networks:
+  portainer_agent:
+    driver: overlay
+    attachable: true
+  overlay_network:
+    external: true

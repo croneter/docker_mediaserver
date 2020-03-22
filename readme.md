@@ -5,7 +5,7 @@ Tested on Ubuntu Pro 18-04
 Update to latest Linux version
 ```
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get dist-upgrade
 ```
 Enable the official Docker repository by following [this docker.com guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Then install Docker:
 ```
@@ -23,6 +23,12 @@ sudo usermod -aG docker dockeruser
 su dockeruser
 ```
 From now on, always use `dockeruser` for any operations.
+
+### Get Docker Swarm up and running
+Replace the IP `192.168.0.2` with your own for the swarm, e.g. simply the server's own IP if your running everything on a single host/node/server:
+```
+docker swarm init --advertise-addr 192.168.0.2
+```
 
 ### Pull code from Github
 Navigate to a folder where you'd like to set-up this docker-compose recipe and your personal docker setup, e.g. `~/docker-mediaserver`. Get everything from Github:
@@ -43,16 +49,60 @@ docker-compose up -d
 
 ## Configure Services
 
-### Make adjustments for your configuration
+### Set secrets
+Create the secrets that we need to run our stacks. Choose any strong master/admin password for Keycloak with `keycloak_admin_password`. Grad your token from duckdns.org for `traefik_duckdns_token`.
+```
+printf <secret> | docker secret create keycloak_admin_password -
+printf <secret> | docker secret create traefik_duckdns_token -
+```
+If you want to edit a secret, simply remove it first with
+```
+docker secret rm <name of the secret, e.g. keycloak_admin_password>
+```
+
+### Set your environment variables to suit your config
+**Alternatively** change your local environment variables permanently (make sure you're logged in as user `dockeruser`):
+```
+nano ~/.bashrc
+exit
+su dockeruser
+```
+
+Your public domain or IP to reach your home theater. SSL assumes you're using duckdns.org!
+```
+export HTPC_DOMAIN=example.duckdns.org
+```
+The port you want Plex to run on, e.g. 32400
+```
+export HTPC_PLEX_ADVERTISE_PORT=32400
+```
+The email you want for your SSL certificate:
+```
+export HTPC_LETSENCRYPT_EMAIL=
+```
+The Keycloak realm you're setting up:
+```
+export HTPC_KEYCLOAK_REALM=
+```
+```
+
+export HTPC_CONFIG_DIR=<path to folder>
+export HTPC_DOWNLOAD_DIR=
+export HTPC_MOVIE_DIR=
+export HTPC_SHOW_DIR=
+export HTPC_MUSIC_DIR=
+export HTPC_PICTURE_DIR=
+```
+
+### Adapt all environment files
 Set-up your values in the docker environment file:
 ```
 cp .env.example .env
 nano .env
 ```
-Set-up your secrets (sensitive stuff you'd NEVER want to leak). Get the Plex claim from [plex.tv/claim](https://www.plex.tv/claim) (claim will only be valid for 5 minutes!!) and paste it into `plex-claim.txt`. Choose any secure password for `keycloak_admin_pwd.txt`.
+Set-up your secrets (sensitive stuff you'd NEVER want to leak). Choose any secure password for `keycloak_admin_pwd.txt`.
 ```
 mkdir secrets
-nano ./secrets/plex-claim.txt
 nano ./secrets/keycloak_admin_pwd.txt
 ```
 
@@ -64,7 +114,7 @@ docker-compose up -d
 
 ### Setting up Keycloak
 On first "boot" of your server, visit `https://keycloak.<yourdomain>`. Use your Keycloak admin credentials to log-in.
-* Create a new realm. Paste that realm's name into `.env` as `KEYCLOAK_REALM`
+* Create a new realm. Paste that realm's name into `.env` as `HTPC_KEYCLOAK_REALM`
 * Create a new client for our container `forward-auth`. Set `Access Type` to `Confidential`. Set one `Valid Redirect URIs` to `https://auth.<yourdomain>/_oauth`
 * Copy the `Client ID` and paste it as `KEYCLOAK_CLIENT_ID` in our `.env` file
 * In the Credentials tab, copy the `Secret` and paste it as `KEYCLOAK_CLIENT_SECRET` in our `.env` file. 
@@ -85,29 +135,40 @@ Deactivate the `X_Frame_Options` to allow iFrames for Organizr by editing the li
 x_frame_options = 0
 ```
 
-### Setup your domain with plex.tv
-As we're using a reverse proxy, we need to tell Plex where to reach the PMS from outside the LAN. Make sure everything is up and running with `docker-compose up -d`, then:
+### Setup your Plex Media Server
+You need to have a valid Plex claim ONCE in order to claim your new Plex Media Server and tie it to your account. 
+* Grab a Plex claim token from [plex.tv/claim](https://www.plex.tv/claim) - it will only be valid for 4 minutes!!
+* Paste the claim token into a new Docker secret: 
 ```
-cd ~/config/plex/Library/Application\ Support/Plex\ Media\ Server
-nano Preferences.xml
+printf <secret> | docker secret create plex_claim -
 ```
-Use `nano` to edit the file and add your custom port:
-```
-ManualPortMappingMode="1" ManualPortMappingPort="<YOUR EXTERNAL PLEX PORT"
-```
-Restart with `docker-compose down` and `docker-compose up -d`.
+* Start your Plex stack.
+* Then connect to Plex by visiting `https://example.duckdns.org:<YOUR EXTERNAL PLEX PORT>` and claim your PMS.
+* Make sure your PMS can be reached from outside: navigate to the PMS settings, then `Remote Access`. Set `Manually specify public port` to your custom port
 
 ### Setup Organizr
 Choose a `Personal`-License if you want Radarr, Sonarr, etc. working, i.e. appearing as Homepage options. For Organizr Single Sign On, use an email address as username. Set-up the exact same email address as a user within Organizr.
 
 Choose the following Organizr `Auth Proxy` settings in the Organizr settings:
 * Auth Proxy: On
-* Auth Proxy Whitelist: `172.28.0.0/16`
+* Auth Proxy Whitelist: `0.0.0.0/0`
 * Auth Proxy Header Name: `X-Forwarded-User`
 
 When adding tabs, use the following setup:
 * Type: `iFrame`
 * Tab Url: https://<service>.croneter-test.duckdns.org
+
+### Custom Lidarr
+Lidarr is customized to enable you to automatically convert FLAC to MP3. Build (or later upgrade) the `lidarr` Docker image with:
+```
+docker build -t lidarr .
+```
+To enable automatic conversation, customize Lidarr:
+* Navigate to Settings -> Connection
+* Create a new Custom Connection
+* For the path, add `/usr/local/bin/flac2mp3.sh`. Only select
+  * "On Release Import"
+  * "On Upgrade"
 
 ### Permissions off for writing/accessing a directory?
 Make sure that the user `dockeruser` owns the entire directory (use a user with sudo-rights):

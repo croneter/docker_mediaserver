@@ -1,0 +1,36 @@
+version: "3.7"
+
+services:
+  lidarr:
+    # image: linuxserver/lidarr:latest
+    image: lidarr
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/lidarr:/config"
+      - "${HTPC_MUSIC_DIR}:/music"
+      - "${HTPC_DOWNLOAD_DIR}:/downloads"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8686"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.lidarr.entrypoints=websecure
+        - traefik.http.routers.lidarr.rule=Host(`lidarr.${HTPC_DOMAIN}`)
+        - traefik.http.routers.lidarr.tls=true
+        - traefik.http.routers.lidarr.middlewares=auth
+        - traefik.http.services.lidarr.loadbalancer.server.port=8686
+
+networks:
+  overlay_network:
+    external: true
