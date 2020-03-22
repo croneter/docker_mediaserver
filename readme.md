@@ -33,8 +33,9 @@ docker swarm init --advertise-addr 192.168.0.2
 ### Pull code from Github
 Navigate to a folder where you'd like to set-up this docker-compose recipe and your personal docker setup, e.g. `~/docker-mediaserver`. Get everything from Github:
 ```
-cd ~
+cd ~/
 git clone https://github.com/croneter/docker_mediaserver ./docker-mediaserver
+cd docker-mediaserver
 git fetch --all
 git pull --all
 ```
@@ -42,76 +43,78 @@ git pull --all
 ### Fetch latest update from Github
 Any time you want to get the latest code from Github, type
 ```
-docker-compose down
-git pull --all
-docker-compose up -d
+git pull
 ```
 
-## Configure Services
+## Configuration Using Docker
 
-### Set secrets
-Create the secrets that we need to run our stacks. Choose any strong master/admin password for Keycloak with `keycloak_admin_password`. Grad your token from duckdns.org for `traefik_duckdns_token`.
+### Set Your Secrets
+Create the secrets that we need to run our stacks. Choose any strong master/admin password for Keycloak with `keycloak_admin_password`. Grab your personal token from [duckdns.org](https://www.duckdns.org/) for `traefik_duckdns_token`.
 ```
 printf <secret> | docker secret create keycloak_admin_password -
 printf <secret> | docker secret create traefik_duckdns_token -
 ```
-If you want to edit a secret, simply remove it first with
+If you ever want to edit a secret, simply remove it first with
 ```
 docker secret rm <name of the secret, e.g. keycloak_admin_password>
 ```
+You'll also need a short-lived Plex secret once, see below.
 
 ### Set your environment variables to suit your config
-**Alternatively** change your local environment variables permanently (make sure you're logged in as user `dockeruser`):
+Run the dedicated script; be sure to log-out and log-in again after doing so!
 ```
-nano ~/.bashrc
-exit
-su dockeruser
+python setup.py
 ```
-
-Your public domain or IP to reach your home theater. SSL assumes you're using duckdns.org!
-```
-export HTPC_DOMAIN=example.duckdns.org
-```
-The port you want Plex to run on, e.g. 32400
-```
-export HTPC_PLEX_ADVERTISE_PORT=32400
-```
-The email you want for your SSL certificate:
-```
-export HTPC_LETSENCRYPT_EMAIL=
-```
-The Keycloak realm you're setting up:
-```
-export HTPC_KEYCLOAK_REALM=
-```
-```
-
-export HTPC_CONFIG_DIR=<path to folder>
-export HTPC_DOWNLOAD_DIR=
-export HTPC_MOVIE_DIR=
-export HTPC_SHOW_DIR=
-export HTPC_MUSIC_DIR=
-export HTPC_PICTURE_DIR=
-```
+Note done all the values you insert; you'll need some below. You'll also probably need to run that command once per Docker swarm node.
 
 ### Adapt all environment files
-Set-up your values in the docker environment file:
+Set-up your values in all the environment files:
 ```
-cp .env.example .env
-nano .env
+nano forward-auth.env.example
+nano keycloak.env.example
+nano pihole.env.example
 ```
-Set-up your secrets (sensitive stuff you'd NEVER want to leak). Choose any secure password for `keycloak_admin_pwd.txt`.
-```
-mkdir secrets
-nano ./secrets/keycloak_admin_pwd.txt
-```
+Be sure to safe each file WITHOUT the ending `.example`, so e.g. as `forward-auth.env`.
 
-## Run everything
+## Run The Stacks
 To get everything up and running, be sure to be in your `~/docker_mediaserver` folder and type
 ```
-docker-compose up -d
+python start.py
+```
+Be sure to first start the stack `overlay` as that stack is needed for everything else, but also `traefik` and `keycloak` should be up and running at any point of time.    
+Alternatively, type directly:
+```
+docker stack deploy -c overlay.yml overlay
+docker stack deploy -c traefik.yml traefik
+docker stack deploy -c keycloak.yml keycloak
 ```
 
+### Plex
+Before running the Plex stack, you'll need to set your short-lived Plex claim. See below.
+
+### Customize Your Lidarr Docker Image
+Lidarr is customized to enable you to automatically convert FLAC to MP3. Build (or later upgrade) the `lidarr` Docker image with:
+```
+docker build -t lidarr .
+```
+To enable automatic conversation, customize Lidarr:
+* Navigate to Settings -> Connection
+* Create a new Custom Connection
+* For the path, add `/usr/local/bin/flac2mp3.sh`. Only select
+  * "On Release Import"
+  * "On Upgrade"
+
+### Build Your DNS Over HTTPS image
+In the `dns-over-https` directory, do
+```
+docker build -t dns-over-https .
+```
+Then
+```
+docker tag dns-over-https:latest dns-over-https:staging
+```
+
+## Setting Up Your Services Using a Browser
 ### Setting up Keycloak
 On first "boot" of your server, visit `https://keycloak.<yourdomain>`. Use your Keycloak admin credentials to log-in.
 * Create a new realm. Paste that realm's name into `.env` as `HTPC_KEYCLOAK_REALM`
@@ -158,24 +161,19 @@ When adding tabs, use the following setup:
 * Type: `iFrame`
 * Tab Url: https://<service>.croneter-test.duckdns.org
 
-### Custom Lidarr
-Lidarr is customized to enable you to automatically convert FLAC to MP3. Build (or later upgrade) the `lidarr` Docker image with:
-```
-docker build -t lidarr .
-```
-To enable automatic conversation, customize Lidarr:
-* Navigate to Settings -> Connection
-* Create a new Custom Connection
-* For the path, add `/usr/local/bin/flac2mp3.sh`. Only select
-  * "On Release Import"
-  * "On Upgrade"
+### Pi-Hole
+See https://www.smarthomebeginner.com/run-pihole-in-docker-on-ubuntu-with-reverse-proxy/ for configuration tipps. 
 
-### Permissions off for writing/accessing a directory?
-Make sure that the user `dockeruser` owns the entire directory (use a user with sudo-rights):
-```
-sudo chown -R dockeruser:docker <dirname>
-```
 
+Pihole uses the user `root`: Log in to Linux as a user with sudo-rights, then
+```
+sudo chown -R root:root /home/dockeruser/config/pihole
+```
+In Pi-Hole, set `172.29.0.2#5053` as upstream DNS and make sure all other DNS entries are disabled. If that does not work, use `1.1.1.1`
+
+
+
+## Other Useful Stuff
 ### Power Management
 List current hard drives with `lsblk`. Use [TLP](https://linrunner.de/en/tlp/docs/tlp-linux-advanced-power-management.html):
 ```
@@ -197,30 +195,8 @@ Check whether the hard disk `/dev/sda` is powered down (wait 5 min!) with
 sudo hdparm -C /dev/sda
 ```
 
-### Get Pi-Hole to work
-
-#### Build DNS over HTTPS image
-In the `dns-over-https` directory, do
+### Permissions off for writing/accessing a directory?
+Make sure that the user `dockeruser` owns the entire directory (use a user with sudo-rights):
 ```
-docker build -t dns-over-https .
+sudo chown -R dockeruser:docker <dirname>
 ```
-Then
-```
-docker tag dns-over-https:latest dns-over-https:staging
-```
-
-#### Rest
-See https://www.smarthomebeginner.com/run-pihole-in-docker-on-ubuntu-with-reverse-proxy/. 
-
-Create empty files before starting docker, otherwise empty directories instead of files are created. 
-```
-cd ~/config
-mkdir pihole
-mkdir pihole/log
-touch ~/config/pihole/log/pihole.log
-```
-Pihole uses the user `root`: Log in as root, then
-```
-sudo chown -R root:root /home/dockeruser/config/pihole
-```
-In Pi-Hole, set `172.29.0.2#5053` as upstream DNS.
