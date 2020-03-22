@@ -29,7 +29,7 @@ services:
       - overlay_network
       - keycloak
     secrets:
-      - keycloak
+      - keycloak_admin_password
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -76,8 +76,8 @@ services:
         - traefik.http.services.forward-auth.loadbalancer.server.port=4181
 
 secrets:
-  keycloak:
-    file: "./secrets/keycloak_admin_pwd.txt"
+  keycloak_admin_password:
+    external: true
 
 networks:
   keycloak:

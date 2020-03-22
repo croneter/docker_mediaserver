@@ -11,12 +11,12 @@ services:
       # websecure
       - 443:443
     secrets:
-      - duckdns_token
+      - traefik_duckdns_token
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - DUCKDNS_TOKEN_FILE=/run/secrets/duckdns_token
+      - DUCKDNS_TOKEN_FILE=/run/secrets/traefik_duckdns_token
       # See https://go-acme.github.io/lego/dns/duckdns/
       # and
       # https://github.com/go-acme/lego/issues/967
@@ -100,8 +100,8 @@ services:
         - traefik.http.services.auth-dummyService.loadbalancer.server.port=9999
 
 secrets:
-  duckdns_token:
-    file: ./secrets/duckdns_token.txt
+  traefik_duckdns_token:
+    external: true
 
 networks:
   overlay_network:

@@ -43,7 +43,7 @@ services:
 
 secrets:
   plex_claim:
-    file: ./secrets/plex_claim.txt
+    external: true
 
 networks:
   overlay_network:

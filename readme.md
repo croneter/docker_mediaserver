@@ -5,7 +5,7 @@ Tested on Ubuntu Pro 18-04
 Update to latest Linux version
 ```
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get dist-upgrade
 ```
 Enable the official Docker repository by following [this docker.com guide](https://docs.docker.com/install/linux/docker-ce/ubuntu/). Then install Docker:
 ```
@@ -49,7 +49,17 @@ docker-compose up -d
 
 ## Configure Services
 
-### Make adjustments for your configuration
+### Set secrets
+Create the secrets that we need to run our stacks. Choose any strong master/admin password for Keycloak with `keycloak_admin_password`. Grad your token from duckdns.org for `traefik_duckdns_token`.
+```
+printf <secret> | docker secret create keycloak_admin_password -
+printf <secret> | docker secret create traefik_duckdns_token -
+```
+If you want to edit a secret, simply remove it first with
+```
+docker secret rm <name of the secret, e.g. keycloak_admin_password>
+```
+
 ### Set your environment variables to suit your config
 **Alternatively** change your local environment variables permanently (make sure you're logged in as user `dockeruser`):
 ```
@@ -126,8 +136,13 @@ x_frame_options = 0
 ```
 
 ### Setup your Plex Media Server
+You need to have a valid Plex claim ONCE in order to claim your new Plex Media Server and tie it to your account. 
 * Grab a Plex claim token from [plex.tv/claim](https://www.plex.tv/claim) - it will only be valid for 4 minutes!!
-* Paste the claim token into a new file `./secrets/plex_claim.txt` and start your Plex stack.
+* Paste the claim token into a new Docker secret: 
+```
+printf <secret> | docker secret create plex_claim -
+```
+* Start your Plex stack.
 * Then connect to Plex by visiting `https://example.duckdns.org:<YOUR EXTERNAL PLEX PORT>` and claim your PMS.
 * Make sure your PMS can be reached from outside: navigate to the PMS settings, then `Remote Access`. Set `Manually specify public port` to your custom port
 

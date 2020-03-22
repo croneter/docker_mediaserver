@@ -4,7 +4,6 @@ import os
 import copy
 import re
 import errno
-import subprocess
 
 from scripts import common
 
@@ -38,11 +37,6 @@ DOWNLOAD_SUBFOLDERS = (
     'complete',
     'incomplete',
     'watch'
-)
-SECRET_FILES = (
-    'duckdns_token.txt',
-    'keycloak_admin_pwd.txt',
-    'plex_claim.txt'
 )
 
 VAR_LIST = {
@@ -329,12 +323,6 @@ def create_files_and_folders(var_list):
     """
     Creates all necessary files and folders for the HTPC
     """
-    # secrets folder
-    try:
-        os.makedirs('./secrets')
-        print('Created folder ./secrets')
-    except FileExistsError:
-        print('Secrets folder exists already')
     # Main folders
     for key, folder in var_list.items():
         if not key.endswith('_DIR'):
@@ -355,7 +343,6 @@ def create_files_and_folders(var_list):
 
     # Create all (empty) files if necessary
     # If Docker does not find a mounted file (not folder), a FOLDER is created
-    create_files_if_not_exist('./secrets', SECRET_FILES)
     create_files_if_not_exist(var_list['HTPC_CONFIG_DIR'],
                               ['pihole/log/pihole.log'])
 
