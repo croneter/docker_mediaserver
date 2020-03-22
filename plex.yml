@@ -5,7 +5,6 @@ services:
     image: linuxserver/plex:latest
     networks:
       - overlay_network
-    hostname: "{{.Service.Name}}-{{.Task.Slot}}"
     secrets:
       - plex_claim
     ports:
