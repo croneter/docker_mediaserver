@@ -1,0 +1,39 @@
+version: "3.7"
+
+services:
+  rtorrent:
+    image: linuxserver/rutorrent:latest
+    networks:
+      - overlay_network
+    ports:
+      - ${HTPC_RTORRENT_PORT_1_TCP}:51413
+      - ${HTPC_RTORRENT_PORT_2_UDP}:6881/udp
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      # Deactivate password
+      - PASSWORD=
+    volumes:
+      - "${HTPC_CONFIG_DIR}/rtorrent:/config"
+      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.rtorrent.entrypoints=websecure
+        - traefik.http.routers.rtorrent.rule=Host(`rtorrent.${HTPC_DOMAIN}`)
+        - traefik.http.routers.rtorrent.tls=true
+        - traefik.http.routers.rtorrent.middlewares=auth
+        - traefik.http.services.rtorrent.loadbalancer.server.port=80
+
+networks:
+  overlay_network:
+    external: true
