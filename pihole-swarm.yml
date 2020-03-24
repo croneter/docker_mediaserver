@@ -27,6 +27,7 @@ services:
       # ("X-Frame-Options" in /etc/lighttpd/lighttpd.conf)
       # See https://github.com/pi-hole/docker-pi-hole/issues/327
       - ./pihole/allow-iframe.sh:/etc/cont-init.d/21-allow-iframe.sh
+      - ./pihole/whitelist.sh:/etc/cont-init.d/22-whitelist.sh
     environment:
       - TZ=${TZ}
       - VIRTUAL_HOST=pihole.${HTPC_DOMAIN}
