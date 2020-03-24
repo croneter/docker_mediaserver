@@ -15,7 +15,6 @@ services:
         condition: on-failure
   pihole:
     image: pihole/pihole:latest
-    hostname: "{{.Node.Hostname}}-{{.Task.ID}}"
     networks:
       pihole:
       overlay_network:
