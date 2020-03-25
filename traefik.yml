@@ -43,6 +43,8 @@ services:
       - --providers.docker.swarmMode=true
       # Containers won't automatically connect
       - --providers.docker.exposedbydefault=false
+      # Default network for traefik to use
+      - --providers.docker.network=overlay_network
       # don't listen in on us, traefik
       - --global.sendanonymoususage=false
       # Entrypoints to our infrastructure
