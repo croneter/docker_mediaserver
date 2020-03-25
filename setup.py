@@ -44,7 +44,6 @@ VAR_LIST = {
     'PUID': None,
     'PGID': None,
     'HTPC_DOMAIN': None,
-    'HTPC_PLEX_ADVERTISE_PORT': None,
     'HTPC_LETSENCRYPT_EMAIL': None,
     'HTPC_KEYCLOAK_REALM': None,
     # Paths
@@ -54,6 +53,9 @@ VAR_LIST = {
     'HTPC_SHOW_DIR': None,
     'HTPC_MUSIC_DIR': None,
     'HTPC_PICTURE_DIR': None,
+    # Ports
+    'HTPC_PLEX_ADVERTISE_PORT': None,
+    'HTPC_DELUGE_DOWNLOAD_PORT': None
 }
 START_LINE = '# start docker_mediaserver variables\n'
 END_LINE = '# end docker_mediaserver variables\n'
@@ -190,7 +192,7 @@ def _get_user_value(key):
             if is_path_exists_or_creatable(value):
                 break
             print(f'Not a valid path name: {value}')
-        elif key == 'HTPC_PLEX_ADVERTISE_PORT':
+        elif key in ('HTPC_PLEX_ADVERTISE_PORT', 'HTPC_DELUGE_DOWNLOAD_PORT'):
             if is_valid_port(value):
                 break
             else:

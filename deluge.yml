@@ -5,6 +5,8 @@ services:
     image: linuxserver/deluge:latest
     networks:
       - overlay_network
+    ports:
+      - ${HTPC_DELUGE_DOWNLOAD_PORT}:12345
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
