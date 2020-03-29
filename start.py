@@ -14,7 +14,7 @@ ALL = (
     'hydra',
     'lidarr',
     'organizr',
-    'pihole-swarm',
+    'pihole',
     'plex',
     'portainer',
     'radarr',
