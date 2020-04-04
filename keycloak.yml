@@ -43,8 +43,6 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=true
-        # BEWARE: add the project to the network name!
-        - traefik.docker.network=overlay_network
         - traefik.http.routers.keycloak.entrypoints=websecure
         - traefik.http.routers.keycloak.rule=Host(`keycloak.${HTPC_DOMAIN}`)
         - traefik.http.routers.keycloak.tls=true

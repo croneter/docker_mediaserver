@@ -49,7 +49,6 @@ services:
         condition: on-failure
       labels:
         - traefik.enable=true
-        - traefik.docker.network=overlay_network
         # Admin console for pihole - need to hit %/admin
         - traefik.http.routers.pihole.entrypoints=websecure
         - traefik.http.routers.pihole.rule=Host(`pihole.${HTPC_DOMAIN}`)
