@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: traefik:v2.1.9
+    image: traefik:v2.2.0
     networks:
       - overlay_network
     ports:
@@ -49,6 +49,9 @@ services:
       - --global.sendanonymoususage=false
       # Entrypoints to our infrastructure
       - --entrypoints.web.address=:80
+      # Global redirect to https
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
       - --entrypoints.websecure.address=:443
       # letsencrypt SSL certificates ("acme")
       - "--certificatesresolvers.ssl.acme.email=${HTPC_LETSENCRYPT_EMAIL}"
@@ -80,13 +83,6 @@ services:
         - traefik.http.routers.api.service=api@internal
         # See https://github.com/containous/traefik/issues/5732
         - traefik.http.services.api-dummyService.loadbalancer.server.port=9999
-        # global redirect to https
-        - traefik.http.routers.redirs.rule=hostregexp(`{host:.+}`)
-        - traefik.http.routers.redirs.entrypoints=web
-        - traefik.http.routers.redirs.middlewares=redirect-to-https
-        - traefik.http.routers.redirs.service=redirs
-        - traefik.http.middlewares.redirect-to-https.redirectScheme.scheme=https
-        - traefik.http.services.redirs.loadbalancer.server.port=443
         # global wildcard certificates
         # See https://github.com/containous/traefik/issues/5317
         - traefik.http.routers.wildcard-certs.entrypoints=websecure
