@@ -31,7 +31,8 @@ CONFIG_SUBFOLDERS = (
     'radarr',
     'sabnzbd',
     'sonarr',
-    'tdarr'
+    'tdarr',
+    'mylar'
 )
 DOWNLOAD_SUBFOLDERS = (
     'complete',
@@ -53,6 +54,7 @@ VAR_LIST = {
     'HTPC_SHOW_DIR': None,
     'HTPC_MUSIC_DIR': None,
     'HTPC_PICTURE_DIR': None,
+    'HTPC_COMIC_DIR': None,
     # Ports
     'HTPC_PLEX_ADVERTISE_PORT': None,
     'HTPC_DELUGE_DOWNLOAD_PORT': None

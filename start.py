@@ -20,7 +20,8 @@ ALL = (
     'radarr',
     'sabnzbd',
     'sonarr',
-    'tdarr'
+    'tdarr',
+    'mylar'
 )
 ENCODING = 'utf-8'
 

@@ -1,0 +1,35 @@
+version: "3.7"
+
+services:
+  mylar:
+    image: linuxserver/mylar:latest
+    networks:
+      - overlay_network
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/mylar:/config"
+      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
+      - "${HTPC_COMIC_DIR}:/comics"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8090"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.mylar.entrypoints=websecure
+        - traefik.http.routers.mylar.rule=Host(`mylar.${HTPC_DOMAIN}`)
+        - traefik.http.routers.mylar.tls=true
+        - traefik.http.routers.mylar.middlewares=auth
+        - traefik.http.services.mylar.loadbalancer.server.port=8090
+
+networks:
+  overlay_network:
+    external: true
