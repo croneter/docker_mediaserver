@@ -35,7 +35,6 @@ services:
       discovery.type: single-node
       node.name: es01
       cluster.name: es-docker-cluster
-      bootstrap.memory_lock: true
     networks:
       - overlay_network
     healthcheck:
