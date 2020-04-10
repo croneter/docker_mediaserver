@@ -31,7 +31,8 @@ CONFIG_SUBFOLDERS = (
     'radarr',
     'sabnzbd',
     'sonarr',
-    'tdarr'
+    'tdarr',
+    'elasticsearch'
 )
 DOWNLOAD_SUBFOLDERS = (
     'complete',
