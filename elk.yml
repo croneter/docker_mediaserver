@@ -1,0 +1,84 @@
+version: "3.7"
+
+services:
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.6.2
+    volumes:
+      -  ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      HTTP.HOST: "0.0.0.0"
+    networks:
+      - overlay_network
+    healthcheck:
+      test: bin/logstash -t
+      interval: 2m
+      timeout: 50s
+      retries: 3
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.logstash.entrypoints=websecure
+        - traefik.http.routers.logstash.rule=Host(`logstash.${HTPC_DOMAIN}`)
+        - traefik.http.routers.logstash.tls=true
+        - traefik.http.services.logstash.loadbalancer.server.port=5000
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.2
+    volumes:
+      - "${HTPC_CONFIG_DIR}/elasticsearch:/usr/share/elasticsearch/data"
+    environment:
+      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      # Use single node discovery in order to disable production mode and avoid bootstrap checks
+      # see https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
+      discovery.type: single-node
+      node.name: es01
+      cluster.name: es-docker-cluster
+      bootstrap.memory_lock: true
+    networks:
+      - overlay_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200"]
+      interval: 2m
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.elasticsearch.entrypoints=websecure
+        - traefik.http.routers.elasticsearch.rule=Host(`elasticsearch.${HTPC_DOMAIN}`)
+        - traefik.http.routers.elasticsearch.tls=true
+        - traefik.http.services.elasticsearch.loadbalancer.server.port=9200
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.6.2
+    networks:
+      - overlay_network
+    depends_on:
+      - elasticsearch
+    environment:
+      server.name: kibana
+      server.host: "0"
+      elasticsearch.hosts: http://elasticsearch:9200
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 2m
+      timeout: 10s
+      retries: 5
+      start_period: 2m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.kibana.entrypoints=websecure
+        - traefik.http.routers.kibana.rule=Host(`kibana.${HTPC_DOMAIN}`)
+        - traefik.http.routers.kibana.tls=true
+        - traefik.http.services.kibana.loadbalancer.server.port=5601
+
+networks:
+  overlay_network:
+    external: true
