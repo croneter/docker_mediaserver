@@ -8,6 +8,7 @@ services:
     # Need to override user so we can access the log files, and docker.sock
     user: root
     volumes:
+      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
       - filebeat_data:/usr/share/filebeat/data
       # This is needed for filebeat to load container log path as specified in
       # filebeat.yml
@@ -15,10 +16,12 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # This is needed for filebeat to load logs for system and auth modules
       - /var/log/:/var/log/:ro
+    # disable strict permission checks
     environment:
-      strict.perms: false
-      output.elasticsearch.hosts: ["elasticsearch:9200"]
-      setup.kibana.host: kibana:5601
+      LOGSTASH_HOST: http://logstash:5044
+      KIBANA_HOST: http://kibana:5601
+    # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
+    command: ["--strict.perms=false"]
     networks:
       - overlay_network
     deploy:
