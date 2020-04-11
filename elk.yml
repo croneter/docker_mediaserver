@@ -78,6 +78,10 @@ services:
         - traefik.http.routers.kibana.tls=true
         - traefik.http.services.kibana.loadbalancer.server.port=5601
 
+volumes:
+  elasticsearch_data:
+    driver: local
+
 networks:
   overlay_network:
     external: true
