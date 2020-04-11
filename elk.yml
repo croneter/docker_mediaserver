@@ -1,6 +1,30 @@
 version: "3.7"
 
 services:
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:7.6.2
+    # https://github.com/docker/swarmkit/issues/1951
+    hostname: "{{.Node.Hostname}}-filebeat"
+    # Need to override user so we can access the log files, and docker.sock
+    user: root
+    volumes:
+      - filebeat_data:/usr/share/filebeat/data
+      # This is needed for filebeat to load container log path as specified in
+      # filebeat.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # This is needed for filebeat to load logs for system and auth modules
+      - /var/log/:/var/log/:ro
+    environment:
+      strict.perms: false
+      output.elasticsearch.hosts: ["elasticsearch:9200"]
+      setup.kibana.host: kibana:5601
+    networks:
+      - overlay_network
+    deploy:
+      mode: global
+      restart_policy:
+        condition: on-failure
   logstash:
     image: docker.elastic.co/logstash/logstash:7.6.2
     volumes:
@@ -86,6 +110,8 @@ services:
 
 volumes:
   elasticsearch_data:
+    driver: local
+  filebeat_data:
     driver: local
 
 networks:
