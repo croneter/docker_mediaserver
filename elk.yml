@@ -4,18 +4,20 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:7.6.2
     volumes:
-      -  ./elk/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro
+      -  ./logstash:/usr/share/logstash/pipeline:ro
     environment:
       LS_JAVA_OPTS: "-Xmx256m -Xms256m"
-      HTTP.HOST: "0.0.0.0"
     networks:
       - overlay_network
     healthcheck:
       test: bin/logstash -t
       interval: 2m
-      timeout: 50s
+      timeout: 30s
       retries: 3
+      start_period: 1m
     deploy:
+      mode: replicated
+      replicas: 1
       restart_policy:
         condition: on-failure
       labels:
@@ -44,6 +46,8 @@ services:
       retries: 5
       start_period: 2m
     deploy:
+      mode: replicated
+      replicas: 1
       restart_policy:
         condition: on-failure
       labels:
@@ -69,6 +73,8 @@ services:
       retries: 5
       start_period: 2m
     deploy:
+      mode: replicated
+      replicas: 1
       restart_policy:
         condition: on-failure
       labels:
