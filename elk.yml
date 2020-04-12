@@ -15,7 +15,7 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # This is needed for filebeat to load logs for system and auth modules
-      - /var/log/:/var/log/:ro
+      - /var/log/:/tmp/log:ro
     # disable strict permission checks
     environment:
       LOGSTASH_HOST: http://logstash:5044
