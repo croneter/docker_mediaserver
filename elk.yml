@@ -22,7 +22,6 @@ services:
       KIBANA_HOST: http://kibana:5601
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     command:
-      - "-e"
       - "--strict.perms=false"
     networks:
       - overlay_network
