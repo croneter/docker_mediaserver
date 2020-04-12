@@ -15,12 +15,12 @@ services:
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # This is needed for filebeat to load logs for system and auth modules
-      - /var/log/:/tmp/log:ro
-    # disable strict permission checks
+      - /var/log/:/var/log/:ro
     environment:
       LOGSTASH_HOST: logstash
       KIBANA_HOST: http://kibana:5601
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
+    # disable strict permission checks
     command:
       - "--strict.perms=false"
     networks:

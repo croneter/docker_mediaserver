@@ -5,10 +5,8 @@ filebeat.modules:
 - module: system
   syslog:
     enabled: true
-    var.paths: ["/tmp/log/syslog*"]
   auth:
     enabled: true
-    var.paths: ["/tmp/log/auth.log*"]
 - module: auditd
   log:
     enabled: true
