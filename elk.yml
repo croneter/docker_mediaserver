@@ -21,7 +21,9 @@ services:
       LOGSTASH_HOST: http://logstash:5044
       KIBANA_HOST: http://kibana:5601
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
-    command: ["--strict.perms=false"]
+    command:
+      - "-e"
+      - "--strict.perms=false"
     networks:
       - overlay_network
     deploy:
