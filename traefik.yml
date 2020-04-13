@@ -60,6 +60,11 @@ services:
       # When testing, uncomment this. Letsencrypt only allows a limited number of
       # requests for certificates
       # - "--certificatesresolvers.ssl.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+    labels:
+      co.elastic.logs/disable: false
+      co.elastic.logs/module: traefik
+      co.elastic.logs/fileset.stdout: access
+      co.elastic.logs/fileset.stderr: error
     healthcheck:
       test: traefik healthcheck --ping
     deploy:
