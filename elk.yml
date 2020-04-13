@@ -22,11 +22,8 @@ services:
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     # disable strict permission checks
     command:
-      - "filebeat -e setup"
-      - "filebeat modules enable system auditd traefik"
-      # log to standard output, what is recommended for deployments in docker
-      - "-e"
-      - "--strict.perms=false"
+      - "./filebeat setup --pipelines --modules system,auditd,traefik"
+      # - "./filebeat --strict.perms=false"
     networks:
       - overlay_network
     deploy:
