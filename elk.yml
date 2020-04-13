@@ -8,14 +8,14 @@ services:
     # Need to override user so we can access the log files, and docker.sock
     user: root
     volumes:
-      - ./filebeat/filebeat.docker.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - filebeat_data:/usr/share/filebeat/data
       # This is needed for filebeat to load container log path as specified in
       # filebeat.yml
       - /var/lib/docker/containers:/var/lib/docker/containers:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       # This is needed for filebeat to load logs for system and auth modules
-      - /var/log/:/var/log/:ro
+      - /var/log/:/tmp/log/:ro
     environment:
       LOGSTASH_HOST: logstash
       KIBANA_HOST: http://kibana:5601
