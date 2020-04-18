@@ -5,7 +5,7 @@ set -euo pipefail
 
 until curl -s "${KIBANA_HOST}/login" | grep "Loading Kibana" > /dev/null; do
       echo "Waiting for kibana..."
-      sleep 1
+      sleep 5
 done
 
 echo "Setting up dashboards..."
@@ -19,5 +19,3 @@ filebeat setup \
     --strict.perms=false
 
 echo "Done Filebeat custom startup script"
-
-/usr/local/bin/docker-entrypoint -e --strict.perms=false
