@@ -774,7 +774,7 @@ filebeat.autodiscover:
               container.image.name: traefik
           config:
             - module: traefik
-              log:
+              access:
                 input:
                   type: container
                   paths:
