@@ -15,4 +15,5 @@ filebeat setup \
     --pipelines \
     --modules ${FILEBEAT_MODULES} \
     -E output.logstash.enabled=false \
-    -E 'output.elasticsearch.hosts=["${ELASTIC_HOST}"]'
+    -E 'output.elasticsearch.hosts=["${ELASTIC_HOST}"]' \
+    -strict.perms=false
