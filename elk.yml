@@ -28,12 +28,6 @@ services:
     depends_on:
       - elasticsearch
       - kibana
-    healthcheck:
-      test: filebeat test config
-      interval: 2m
-      timeout: 15s
-      retries: 5
-      start_period: 3m
     deploy:
       mode: global
       restart_policy:
