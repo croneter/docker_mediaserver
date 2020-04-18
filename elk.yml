@@ -9,7 +9,7 @@ services:
     user: root
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./filebeat/setup-filebeat.sh:/usr/local/bin/setup-filebeat.sh:ro
+      - ./filebeat/setup-filebeat.sh:/usr/local/bin/setup-filebeat.sh
       - filebeat_data:/usr/share/filebeat/data
       # This is needed for filebeat to load container log path as specified in
       # filebeat.yml
