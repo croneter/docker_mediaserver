@@ -25,9 +25,8 @@ services:
       FILEBEAT_MODULES: "system,auditd,traefik"
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     # disable strict permission checks
-    command: ["/bin/bash", "-c",
-              "/usr/local/bin/setup-filebeat.sh",
-              "-e", "-strict.perms=false"]
+    command: ["/bin/bash", "-c", "/usr/local/bin/setup-filebeat.sh"]
+    entrypoint: ["filebeat", "-e", "--strict.perms=false"]
     networks:
       - overlay_network
     depends_on:
