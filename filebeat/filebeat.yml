@@ -774,7 +774,7 @@ filebeat.autodiscover:
         # Traefik config
         - condition:
             contains:
-              docker.container.image: traefik
+              docker.container.labels.com_docker_swarm_service_name: traefik
           config:
             - module: traefik
               log:
