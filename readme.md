@@ -114,6 +114,12 @@ Then
 docker tag dns-over-https:latest dns-over-https:staging
 ```
 
+### Build your own filebeat image
+In the `filebeat` directory, do
+```
+docker build -t my-filebeat .
+```
+
 ## Setting Up Your Services Using a Browser
 ### Setting up Keycloak
 On first "boot" of your server, visit `https://keycloak.<yourdomain>`. Use your Keycloak admin credentials to log-in.
