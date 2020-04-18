@@ -770,6 +770,18 @@ filebeat.autodiscover:
       # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover-hints.html
       # This URL also contains instructions on multi-line logs
       hints.enabled: true
+      templates:
+        # Traefik config
+        - condition:
+            contains:
+              docker.container.image: traefik
+          config:
+            - module: traefik
+              log:
+                input:
+                  type: container
+                  paths:
+                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
 #      templates:
 #        - condition:
 #            equals.docker.container.image: busybox

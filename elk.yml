@@ -20,7 +20,7 @@ services:
       ELASTIC_HOST: http://elasticsearch:9200
       KIBANA_HOST: http://kibana:5601
       # All modules, separated by a comma
-      FILEBEAT_MODULES: "system,auditd"
+      FILEBEAT_MODULES: "system,auditd,traefik"
     command: ["/bin/bash", "-c",
               "/usr/share/filebeat/setup-filebeat.sh && -e --strict.perms=false"]
     networks:
