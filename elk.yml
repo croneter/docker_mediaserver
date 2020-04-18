@@ -26,7 +26,7 @@ services:
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     # disable strict permission checks
     command: ["/bin/bash", "-c",
-              "chmod +x /usr/local/bin/setup-filebeat.sh && /usr/local/bin/setup-filebeat.sh",
+              "/usr/local/bin/setup-filebeat.sh",
               "-e", "-strict.perms=false"]
     networks:
       - overlay_network

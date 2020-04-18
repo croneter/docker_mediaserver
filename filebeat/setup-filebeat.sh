@@ -11,11 +11,11 @@ done
 echo "Setting up dashboards..."
 # https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-template.html#load-template-manually
 filebeat setup \
-    --strict.perms=false \
     --index-management \
     --pipelines \
     --modules ${FILEBEAT_MODULES} \
     -E output.logstash.enabled=false \
-    -E 'output.elasticsearch.hosts=["${ELASTIC_HOST}"]'
+    -E 'output.elasticsearch.hosts=["${ELASTIC_HOST}"]' \
+    --strict.perms=false
 
 echo "Done Filebeat custom startup script"
