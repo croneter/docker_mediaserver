@@ -25,8 +25,8 @@ services:
       FILEBEAT_MODULES: "system,auditd,traefik"
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     # disable strict permission checks
-    command: ["/bin/bash", "-c", "/usr/local/bin/setup-filebeat.sh"]
-    entrypoint: ["/usr/local/bin/docker-entrypoint", "-e", "--strict.perms=false"]
+    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/setup-filebeat.sh"]
+    # entrypoint: ["/usr/local/bin/docker-entrypoint", "-e", "--strict.perms=false"]
     networks:
       - overlay_network
     depends_on:

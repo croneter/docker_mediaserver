@@ -19,3 +19,5 @@ filebeat setup \
     --strict.perms=false
 
 echo "Done Filebeat custom startup script"
+
+/usr/local/bin/docker-entrypoint -e --strict.perms=false
