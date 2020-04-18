@@ -9,7 +9,7 @@ services:
     user: root
     volumes:
       - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-      - ./filebeat/setup-filebeat.sh:/usr/share/filebeat/setup-filebeat.sh:ro
+      - ./filebeat/setup-filebeat.sh:/usr/local/bin/setup-filebeat.sh:ro
       - filebeat_data:/usr/share/filebeat/data
       # This is needed for filebeat to load container log path as specified in
       # filebeat.yml
@@ -25,7 +25,7 @@ services:
       FILEBEAT_MODULES: "system,auditd,traefik"
     # https://www.elastic.co/guide/en/beats/libbeat/current/config-file-permissions.html
     # disable strict permission checks
-    command: ["/bin/bash", "-c", "/usr/share/filebeat/setup-filebeat.sh", "&&",
+    command: ["/bin/bash", "-c", "/usr/local/bin/setup-filebeat.sh", "&&",
               "-e", "-strict.perms=false"]
     networks:
       - overlay_network
