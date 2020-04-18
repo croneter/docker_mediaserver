@@ -75,9 +75,6 @@ filebeat.modules:
     # Input configuration (advanced). Any input configuration option
     # can be added under this section.
     #input:
-- module: traefik
-  access:
-    enabled: true
 
 #---------------------------- Elasticsearch Module ----------------------------
 # - module: elasticsearch
