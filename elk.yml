@@ -20,7 +20,7 @@ services:
       ELASTIC_HOST: http://elasticsearch:9200
       KIBANA_HOST: http://kibana:5601
       # All modules, separated by a comma
-      FILEBEAT_MODULES: "system,auditd,traefik"
+      FILEBEAT_MODULES: "system,auditd"
     command: ["/bin/bash", "-c",
               "/usr/share/filebeat/setup-filebeat.sh && -e --strict.perms=false"]
     networks:
@@ -28,6 +28,12 @@ services:
     depends_on:
       - elasticsearch
       - kibana
+    healthcheck:
+      test: filebeat test config
+      interval: 2m
+      timeout: 15s
+      retries: 5
+      start_period: 3m
     deploy:
       mode: global
       restart_policy:
@@ -102,7 +108,7 @@ services:
       interval: 2m
       timeout: 10s
       retries: 5
-      start_period: 2m
+      start_period: 3m
     deploy:
       mode: replicated
       replicas: 1
