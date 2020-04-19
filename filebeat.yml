@@ -29,7 +29,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: any
+        condition: on-failure
 
 volumes:
   filebeat_data:

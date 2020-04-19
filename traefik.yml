@@ -38,6 +38,7 @@ services:
       # This is the "static traefik configuration"
       - --log.level=INFO  # Possible values: DEBUG, INFO, WARN, ERROR
       # - --log.format=json
+      - --accesslog=true
       - --api.dashboard=true
       - --ping
       # Enable docker as provider for traefik in Docker Swarm mode. 
