@@ -379,21 +379,21 @@ filebeat.modules:
 #=========================== Filebeat inputs =============================
 
 # List of inputs to fetch data.
-# filebeat.inputs:
-# # Each - is an input. Most options can be set at the input level, so
-# # you can use different inputs for various configurations.
-# # Below are the input specific configurations.
+filebeat.inputs:
+# Each - is an input. Most options can be set at the input level, so
+# you can use different inputs for various configurations.
+# Below are the input specific configurations.
 
-# # Type of the files. Based on this the way the file is read is decided.
-# # The different types cannot be mixed in one input
-# #
-# # Possible options are:
-# # * log: Reads every line of the log file (default)
-# # * stdin: Reads the standard in
+# Type of the files. Based on this the way the file is read is decided.
+# The different types cannot be mixed in one input
+#
+# Possible options are:
+# * log: Reads every line of the log file (default)
+# * stdin: Reads the standard in
 
-# - type: container
-#   paths:
-#     - /var/lib/docker/containers/*/*-json.log
+- type: container
+  paths:
+    - /var/lib/docker/containers/*/*-json.log
 
 #------------------------------ Log input --------------------------------
 # - type: log
