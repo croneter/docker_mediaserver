@@ -1,5 +1,7 @@
 #!/bin/bash
-echo "Starting Filebeat custom startup script"
+echo "==============================================================="
+echo "=========== Starting Filebeat custom startup script ==========="
+echo "==============================================================="
 
 set -euo pipefail
 
@@ -23,4 +25,6 @@ filebeat setup \
     -E 'output.elasticsearch.hosts=["${ELASTIC_HOST}"]' \
     --strict.perms=false
 
-echo "Done Filebeat custom startup script"
+echo "============================================================="
+echo "===========  Done Filebeat custom startup script ============"
+echo "============================================================="
