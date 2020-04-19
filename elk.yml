@@ -32,7 +32,7 @@ services:
     deploy:
       mode: global
       restart_policy:
-        condition: on-failure
+        condition: any
   logstash:
     image: docker.elastic.co/logstash/logstash:7.6.2
     volumes:
