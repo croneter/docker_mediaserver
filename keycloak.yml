@@ -36,8 +36,6 @@ services:
       - TZ=${TZ}
     env_file:
       - keycloak.env
-    depends_on:
-      - keycloak_db
     deploy:
       restart_policy:
         condition: on-failure
@@ -60,8 +58,6 @@ services:
       - AUTH_HOST=auth.${HTPC_DOMAIN}
     env_file:
       - forward-auth.env
-    depends_on:
-      - keycloak
     deploy:
       restart_policy:
         condition: on-failure

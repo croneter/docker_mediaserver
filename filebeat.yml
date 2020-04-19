@@ -26,9 +26,6 @@ services:
               "/usr/share/filebeat/setup-filebeat.sh && filebeat --strict.perms=false"]
     networks:
       - overlay_network
-    depends_on:
-      - elasticsearch
-      - kibana
     deploy:
       mode: global
       restart_policy:

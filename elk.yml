@@ -60,8 +60,6 @@ services:
     image: docker.elastic.co/kibana/kibana:7.6.2
     networks:
       - overlay_network
-    depends_on:
-      - elasticsearch
     environment:
       server.name: kibana
       server.host: "0"
