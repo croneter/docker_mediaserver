@@ -766,7 +766,7 @@ filebeat.autodiscover:
     - type: docker
       # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover-hints.html
       # This URL also contains instructions on multi-line logs
-      hints.enabled: true
+      hints.enabled: false
       templates:
         # Traefik config
         - condition:
