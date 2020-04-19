@@ -13,8 +13,8 @@ services:
       test: bin/logstash -t
       interval: 2m
       timeout: 30s
-      retries: 3
-      start_period: 1m
+      retries: 5
+      start_period: 2m
     deploy:
       mode: replicated
       replicas: 1
