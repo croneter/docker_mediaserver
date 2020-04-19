@@ -1,8 +1,3 @@
-filebeat.inputs:
-- type: docker
-  containers.ids: '*'
-
-
 output.logstash:
   enabled: true
   hosts: ["${LOGSTASH_HOST}"]
