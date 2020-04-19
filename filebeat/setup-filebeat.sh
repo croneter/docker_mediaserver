@@ -3,6 +3,11 @@ echo "Starting Filebeat custom startup script"
 
 set -euo pipefail
 
+until curl -f "${ELASTIC_HOST}" > /dev/null; do
+      echo "Waiting for elasticsearch..."
+      sleep 5
+done
+
 until curl -s "${KIBANA_HOST}/login" | grep "Loading Kibana" > /dev/null; do
       echo "Waiting for kibana..."
       sleep 5

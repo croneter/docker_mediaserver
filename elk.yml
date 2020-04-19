@@ -8,6 +8,7 @@ services:
     # Need to override user so we can access the log files, and docker.sock
     user: root
     volumes:
+      - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml
       - filebeat_data:/usr/share/filebeat/data
       # This is needed for filebeat to load container log path as specified in
       # filebeat.yml
