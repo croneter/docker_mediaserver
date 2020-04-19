@@ -391,8 +391,9 @@ filebeat.inputs:
 # * log: Reads every line of the log file (default)
 # * stdin: Reads the standard in
 
-- type: docker
-  containers.ids: '*'
+- type: container
+  paths:
+    - /var/lib/docker/containers/*/*-json.log
 
 #------------------------------ Log input --------------------------------
 # - type: log
