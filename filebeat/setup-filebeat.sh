@@ -3,7 +3,7 @@ echo "Starting Filebeat custom startup script"
 
 set -euo pipefail
 
-until curl -f "${ELASTIC_HOST}" > /dev/null; do
+until curl -sf "${ELASTIC_HOST}" > /dev/null; do
       echo "Waiting for elasticsearch..."
       sleep 5
 done
