@@ -25,6 +25,10 @@ filebeat.modules:
     enabled: true
     var.paths: ["/tmp/log/audit/audit.log*"]
 
+- module: traefik
+  access:
+    enabled: true
+
 
 filebeat.autodiscover:
   providers:
@@ -32,16 +36,15 @@ filebeat.autodiscover:
       hints.enabled: false
       templates:
         # Traefik config
-        - condition:
-            contains:
-              container.image.name: traefik
+        - condition.contains:
+            container.image.name: "traefik"
           config:
             - module: traefik
               access:
                 input:
                   type: container
                   paths:
-                    - /var/lib/docker/containers/${data.docker.container.id}/*.log
+                    - "/var/lib/docker/containers/${data.docker.container.id}/${data.docker.container.id}-json.log"
 
 
 processors:
