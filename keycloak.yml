@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   keycloak_db:
-    image: postgres:12.2-alpine
+    image: postgres:12.1-alpine
     networks:
       - keycloak
     volumes:
