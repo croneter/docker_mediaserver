@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   hydra:
-    image: linuxserver/hydra2:latest
+    image: linuxserver/nzbhydra2:latest
     networks:
       - overlay_network
     environment:
