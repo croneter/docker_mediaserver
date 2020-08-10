@@ -2,8 +2,7 @@ version: "3.7"
 
 services:
   lidarr:
-    # image: linuxserver/lidarr:latest
-    image: lidarr
+    build: ./lidarr/Dockerfile
     networks:
       - overlay_network
     environment:

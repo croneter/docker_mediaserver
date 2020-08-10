@@ -93,11 +93,7 @@ docker stack deploy -c keycloak.yml keycloak
 Before running the Plex stack, you'll need to set your short-lived Plex claim. See below.
 
 ### Customize Your Lidarr Docker Image
-Lidarr is customized to enable you to automatically convert FLAC to MP3. Build (or later upgrade) the `lidarr` Docker image with:
-```
-docker build -t lidarr .
-```
-To enable automatic conversation, customize Lidarr:
+Lidarr is customized to enable you to automatically convert FLAC to MP3. To enable automatic conversation, customize Lidarr:
 * Navigate to Settings -> Connection
 * Create a new Custom Connection
 * For the path, add `/usr/local/bin/flac2mp3.sh`. Only select
