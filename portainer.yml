@@ -26,7 +26,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - "${HTPC_CONFIG_DIR}/portainer:/data"
+      - portainer_data:/data
     # TODO: Add healthcheck (curl not available within container)
     deploy:
       restart_policy:
@@ -49,3 +49,6 @@ networks:
     attachable: true
   overlay_network:
     external: true
+
+volumes:
+  portainer_data:
