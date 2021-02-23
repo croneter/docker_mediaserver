@@ -17,7 +17,7 @@ services:
     image: portainer/portainer-ce:latest
     # portainer clashes with traefik basic auth's header "Authorization"
     # Plus we're using traefik for auth
-    command: -H tcp://tasks.agent:9001 --tlsskipverify
+    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
     networks:
       - portainer_agent
       - overlay_network
