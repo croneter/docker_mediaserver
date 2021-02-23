@@ -17,7 +17,7 @@ services:
     image: portainer/portainer-ce:latest
     # portainer clashes with traefik basic auth's header "Authorization"
     # Plus we're using traefik for auth
-    command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
+    command: -H tcp://tasks.agent:9001 --tlsskipverify
     networks:
       - portainer_agent
       - overlay_network
@@ -26,8 +26,7 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - "${HTPC_CONFIG_DIR}/portainer:/data"
+      - portainer_data:/data
     # TODO: Add healthcheck (curl not available within container)
     deploy:
       restart_policy:
@@ -50,3 +49,6 @@ networks:
     attachable: true
   overlay_network:
     external: true
+
+volumes:
+  portainer_data:
