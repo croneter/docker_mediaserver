@@ -14,7 +14,7 @@ services:
       placement:
         constraints: [node.platform.os == linux]
   portainer:
-    image: portainer/portainer:latest
+    image: portainer/portainer-ce:latest
     # portainer clashes with traefik basic auth's header "Authorization"
     # Plus we're using traefik for auth
     command: -H tcp://tasks.agent:9001 --tlsskipverify --no-auth
