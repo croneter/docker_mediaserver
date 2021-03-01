@@ -10,6 +10,7 @@ services:
       - TZ=${TZ}
       - PUID=${PUID}
       - PGID=${PGID}
+      - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/tdarr:/var/lib/mongodb"
       - "${HTPC_MOVIE_DIR}:/home/Tdarr/Media/movies"

@@ -11,6 +11,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=007
       - DELUGE_LOGLEVEL=INFO
     volumes:
       - "${HTPC_CONFIG_DIR}/deluge:/config"

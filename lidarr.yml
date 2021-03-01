@@ -10,6 +10,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/lidarr:/config"
       - "${HTPC_MUSIC_DIR}:/music"
