@@ -24,6 +24,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=007
       - FILE__PLEX_CLAIM=/run/secrets/plex_claim
     volumes:
       - "${HTPC_CONFIG_DIR}/plex:/config"

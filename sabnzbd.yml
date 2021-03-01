@@ -9,6 +9,7 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
+      - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/sabnzbd:/config"
       - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
