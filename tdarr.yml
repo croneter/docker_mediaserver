@@ -9,7 +9,7 @@ services:
     environment:
       - TZ=${TZ}
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/tdarr:/var/lib/mongodb"

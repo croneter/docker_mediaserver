@@ -7,7 +7,7 @@ services:
       - overlay_network
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
     volumes:
       - "${HTPC_CONFIG_DIR}/organizr:/config"

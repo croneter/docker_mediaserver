@@ -22,7 +22,7 @@ services:
       - 32469:32469  # for access to the Plex DLNA Server
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - UMASK=007
       - FILE__PLEX_CLAIM=/run/secrets/plex_claim
