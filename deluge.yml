@@ -9,7 +9,7 @@ services:
       - ${HTPC_DELUGE_DOWNLOAD_PORT}:12345
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - UMASK=007
       - DELUGE_LOGLEVEL=INFO

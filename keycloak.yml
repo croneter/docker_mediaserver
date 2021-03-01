@@ -9,7 +9,7 @@ services:
       - "${HTPC_CONFIG_DIR}/keycloak_db:/var/lib/postgresql/data"
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERSGROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - POSTGRES_DB=keycloak
       - POSTGRES_USER=keycloak
@@ -32,7 +32,7 @@ services:
       - keycloak_admin_password
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERSGROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
     env_file:
       - keycloak.env
@@ -53,7 +53,7 @@ services:
       - overlay_network
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - PROVIDERS_OIDC_ISSUER_URL=https://keycloak.${HTPC_DOMAIN}/auth/realms/${HTPC_KEYCLOAK_REALM}
       - COOKIE_DOMAIN=${HTPC_DOMAIN}
