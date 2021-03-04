@@ -9,7 +9,7 @@ services:
       - "${HTPC_CONFIG_DIR}/keycloak_db:/var/lib/postgresql/data"
     environment:
       - PUID=${PUID}
-      - PGID=${GROUP_ID_DOWNLOADERSGROUP_ID_DOWNLOADERS}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - POSTGRES_DB=keycloak
       - POSTGRES_USER=keycloak
