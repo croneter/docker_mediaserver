@@ -32,7 +32,7 @@ services:
       - keycloak_admin_password
     environment:
       - PUID=${PUID}
-      - PGID=${GROUP_ID_DOWNLOADERSGROUP_ID_DOWNLOADERS}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
     env_file:
       - keycloak.env
