@@ -48,7 +48,7 @@ services:
         - traefik.http.routers.keycloak.tls=true
         - traefik.http.services.keycloak.loadbalancer.server.port=8080
   forward-auth:
-    image: thomseddon/traefik-forward-auth:2.1
+    image: thomseddon/traefik-forward-auth:2.2
     networks:
       - overlay_network
     environment:
