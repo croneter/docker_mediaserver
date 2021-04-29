@@ -19,7 +19,7 @@ services:
       interval: 2m
       timeout: 5s
       retries: 3
-      start_period: 1m
+      start_period: 3m
     deploy:
       restart_policy:
         condition: on-failure
