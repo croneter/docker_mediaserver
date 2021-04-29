@@ -38,6 +38,12 @@ services:
       - keycloak.env
     depends_on:
       - keycloak_db
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/auth/"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 3m
     deploy:
       restart_policy:
         condition: on-failure
