@@ -200,3 +200,18 @@ Make sure that the user `dockeruser` owns the entire directory (use a user with 
 ```
 sudo chown -R dockeruser:docker <dirname>
 ```
+Change the standard group new files and folders are associated with, permanently to `docker`, and associate all existing files and folders with that group:
+```
+chmod -R g+s docker <dirname>
+chgrp -R docker <dirname>
+```
+New files and folders shall be fully readable and writable by the associated group, not even visible for `others`:
+```
+setfacl -R -d -m g::rwx <dirname>
+setfacl -R -d -m o::--- <dirname>
+```
+Change this also for existing files and folders:
+```
+setfacl -R -m g::rwx <dirname>
+setfacl -R -m o::--- <dirname>
+```
