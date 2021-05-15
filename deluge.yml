@@ -12,7 +12,7 @@ services:
       - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - UMASK=007
-      - DELUGE_LOGLEVEL=INFO
+      - DELUGE_LOGLEVEL=error
     volumes:
       - "${HTPC_CONFIG_DIR}/deluge:/config"
       - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
