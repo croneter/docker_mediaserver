@@ -12,9 +12,9 @@ services:
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/sabnzbd:/config"
-      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
-      - "${HTPC_DOWNLOAD_DIR}/incomplete:/incomplete-downloads"
-      - "${HTPC_DOWNLOAD_DIR}/watch:/watch"
+      - "${HTPC_COMPLETED_DIR}:/completed"
+      - "${HTPC_INCOMPLETE_DIR}:/incomplete-downloads"
+      - "${HTPC_WATCH_DIR}:/watch"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 2m

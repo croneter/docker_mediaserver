@@ -14,7 +14,7 @@ services:
     volumes:
       - "${HTPC_CONFIG_DIR}/lidarr:/config"
       - "${HTPC_MUSIC_DIR}:/music"
-      - "${HTPC_DOWNLOAD_DIR}:/downloads"
+      - "${HTPC_COMPLETED_DIR}:/completed"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8686"]
       interval: 2m

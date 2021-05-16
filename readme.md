@@ -202,7 +202,7 @@ sudo chown -R dockeruser:docker <dirname>
 ```
 Change the standard group new files and folders are associated with, permanently to `docker`, and associate all existing files and folders with that group:
 ```
-chmod -R g+s docker <dirname>
+chmod -R g+s <dirname>
 chgrp -R docker <dirname>
 ```
 New files and folders shall be fully readable and writable by the associated group, not even visible for `others`:

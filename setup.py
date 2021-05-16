@@ -48,7 +48,9 @@ VAR_LIST = {
     'HTPC_KEYCLOAK_REALM': None,
     # Paths
     'HTPC_CONFIG_DIR': None,
-    'HTPC_DOWNLOAD_DIR': None,
+    'HTPC_COMPLETED_DIR': None,
+    'HTPC_INCOMPLETE_DIR': None,
+    'HTPC_WATCH_DIR': None,
     'HTPC_MOVIE_DIR': None,
     'HTPC_SHOW_DIR': None,
     'HTPC_MUSIC_DIR': None,
@@ -340,8 +342,6 @@ def create_files_and_folders(var_list):
     # create necessary subfolders
     create_subfolders_if_not_exist(var_list['HTPC_CONFIG_DIR'],
                                    CONFIG_SUBFOLDERS)
-    create_subfolders_if_not_exist(var_list['HTPC_DOWNLOAD_DIR'],
-                                   DOWNLOAD_SUBFOLDERS)
 
     # Create all (empty) files if necessary
     # If Docker does not find a mounted file (not folder), a FOLDER is created
