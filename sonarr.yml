@@ -12,7 +12,7 @@ services:
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/sonarr:/config"
-      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
+      - "${HTPC_COMPLETED_DIR}:/completed"
       - "${HTPC_SHOW_DIR}:/tv"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8989"]

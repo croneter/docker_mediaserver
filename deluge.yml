@@ -15,7 +15,8 @@ services:
       - DELUGE_LOGLEVEL=error
     volumes:
       - "${HTPC_CONFIG_DIR}/deluge:/config"
-      - "${HTPC_DOWNLOAD_DIR}:/downloads"
+      - "${HTPC_COMPLETED_DIR}:/completed"
+      - "${HTPC_INCOMPLETE_DIR}:/incomplete"
       - ./deluge/WebAPI-0.4.0-py3.6.egg:/usr/lib/python3/dist-packages/deluge/plugins/WebAPI-0.4.0-py3.6.egg
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8112"]

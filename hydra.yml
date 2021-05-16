@@ -12,7 +12,7 @@ services:
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/hydra2:/config"
-      - "${HTPC_DOWNLOAD_DIR}/watch:/downloads"
+      - "${HTPC_WATCH_DIR}:/watch"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5076"]
       interval: 2m

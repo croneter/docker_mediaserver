@@ -12,7 +12,7 @@ services:
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/radarr:/config"
-      - "${HTPC_DOWNLOAD_DIR}/complete:/downloads"
+      - "${HTPC_COMPLETED_DIR}:/completed"
       - "${HTPC_MOVIE_DIR}:/movies"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:7878"]
