@@ -42,7 +42,7 @@ DOWNLOAD_SUBFOLDERS = (
 VAR_LIST = {
     'TZ': None,
     'PUID': None,
-    'PGID': None,
+    'GROUP_ID_DOWNLOADERS': None,
     'HTPC_DOMAIN': None,
     'HTPC_LETSENCRYPT_EMAIL': None,
     'HTPC_KEYCLOAK_REALM': None,
