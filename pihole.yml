@@ -40,7 +40,7 @@ services:
       - 8183:80/tcp
     # See here how to find your Youtube IP:
     # https://www.reddit.com/r/pihole/comments/9w5swx/i_think_ive_managed_to_block_youtube_ads_with/
-    command: /bin/bash -c "echo '172.217.168.14 manifest.googlevideo.com' >> /etc/hosts && echo success && /s6-init"
+    command: /bin/bash -c "echo '172.217.168.14 manifest.googlevideo.com' >> /etc/hosts && /s6-init"
     dns:
       # Pihole: first dns must be 127.0.0.1
       - "127.0.0.1"
