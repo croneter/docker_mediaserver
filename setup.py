@@ -31,7 +31,8 @@ CONFIG_SUBFOLDERS = (
     'radarr',
     'sabnzbd',
     'sonarr',
-    'tdarr'
+    'tdarr',
+    'makemkv'
 )
 DOWNLOAD_SUBFOLDERS = (
     'complete',

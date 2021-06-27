@@ -20,7 +20,8 @@ ALL = (
     'radarr',
     'sabnzbd',
     'sonarr',
-    'tdarr'
+    'tdarr',
+    'makemkv'
 )
 ENCODING = 'utf-8'
 

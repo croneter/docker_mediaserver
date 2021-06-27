@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+  makemkv:
+    image: jlesage/makemkv:latest
+    networks:
+      - overlay_network
+    environment:
+      - USER_ID=${PUID}
+      - GROUP_ID=${GROUP_ID_DOWNLOADERS}
+      - TZ=${TZ}
+      - UMASK=007
+    volumes:
+      - "${HTPC_CONFIG_DIR}/makemkv:/config"
+      - "${HTPC_MOVIE_DIR}:/movies"
+      - "${HTPC_SHOW_DIR}:/shows"
+      - "${HTPC_COMPLETED_DIR}:/completed"
+    deploy:
+      restart_policy:
+        condition: any
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.makemkv.entrypoints=websecure
+        - traefik.http.routers.makemkv.rule=Host(`makemkv.${HTPC_DOMAIN}`)
+        - traefik.http.routers.makemkv.tls=true
+        - traefik.http.routers.makemkv.middlewares=auth
+        - traefik.http.services.makemkv.loadbalancer.server.port=5800
+
+networks:
+  overlay_network:
+    external: true
