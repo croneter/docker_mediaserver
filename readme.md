@@ -221,6 +221,7 @@ setfacl -R -m o::--- <dirname>
 docker run -v "$(pwd):$(pwd)" -w "$(pwd)" jrottenberg/ffmpeg:4.1-alpine \
        -stats \
        -i input.mkv \
+       -map 0 \
        -c:v copy \
        -acodec ac3 -b:a 640k \
        output.mkv
