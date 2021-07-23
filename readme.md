@@ -215,3 +215,13 @@ Change this also for existing files and folders:
 setfacl -R -m g::rwx <dirname>
 setfacl -R -m o::--- <dirname>
 ```
+
+### Convert all audio streams to AC3 / Dolby Surround 5.1, leave video untouched
+```
+docker run -v "$(pwd):$(pwd)" -w "$(pwd)" jrottenberg/ffmpeg:4.1-alpine \
+       -stats \
+       -i input.mkv \
+       -c:v copy \
+       -acodec ac3 -b:a 640k \
+       output.mkv
+```
