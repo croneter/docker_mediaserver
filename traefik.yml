@@ -14,7 +14,7 @@ services:
       - traefik_duckdns_token
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
       - DUCKDNS_TOKEN_FILE=/run/secrets/traefik_duckdns_token
       # See https://go-acme.github.io/lego/dns/duckdns/

@@ -23,7 +23,7 @@ services:
       - overlay_network
     environment:
       - PUID=${PUID}
-      - PGID=${PGID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
       - TZ=${TZ}
     volumes:
       - portainer_data:/data
