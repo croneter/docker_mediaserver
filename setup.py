@@ -26,7 +26,6 @@ CONFIG_SUBFOLDERS = (
     'lidarr',
     'pihole/log',
     'pihole/etc/dnsmasq.d',
-    'plex',
     'plex_backup',
     'portainer',
     'radarr',

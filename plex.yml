@@ -27,7 +27,7 @@ services:
       - UMASK=007
       - FILE__PLEX_CLAIM=/run/secrets/plex_claim
     volumes:
-      - "${HTPC_CONFIG_DIR}/plex:/config"
+      - plex:/config
       - "${HTPC_CONFIG_DIR}/plex_backup:/backup"
       - "${HTPC_MOVIE_DIR}:/movies"
       - "${HTPC_SHOW_DIR}:/shows"
@@ -49,4 +49,8 @@ secrets:
 
 networks:
   overlay_network:
+    external: true
+
+volumes:
+  plex:
     external: true

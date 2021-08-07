@@ -216,6 +216,14 @@ setfacl -R -m g::rwx <dirname>
 setfacl -R -m o::--- <dirname>
 ```
 
+### Copy an existing host `directory` into a Docker volume `dockervolume`
+Also see https://github.com/moby/moby/issues/25245. `directory/.` will copy the contents of `directory`; if you want to also copy the `directory` ("name") itself, simply drop `/.`
+```
+docker run -d --rm --name dummy -v dockervolume:/root alpine tail -f /dev/null
+docker cp directory/. dummy:/root/
+docker stop dummy
+```
+
 ### Convert all audio streams to AC3 / Dolby Surround 5.1, leave video untouched
 ```
 docker run -v "$(pwd):$(pwd)" -w "$(pwd)" jrottenberg/ffmpeg:4.1-alpine \
