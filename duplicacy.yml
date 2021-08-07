@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  duplicacy:
+    image: saspus/duplicacy-web:mini
+    networks:
+      - overlay_network
+    hostname: duplicacy-web-docker
+    environment:
+      # Get latest and stable versions here: https://duplicacy.com/latest_web_version
+      - DUPLICACY_WEB_VERSION=1.4.1
+      - TZ=${TZ}
+    volumes:
+      - "${HTPC_CONFIG_DIR}/duplicacy:/config"
+      - "${HTPC_CONFIG_DIR}/duplicacy_logs:/logs"
+      - "/:/backuproot:ro"
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.duplicacy.entrypoints=websecure
+        - traefik.http.routers.duplicacy.rule=Host(`duplicacy.${HTPC_DOMAIN}`)
+        - traefik.http.routers.duplicacy.tls=true
+        - traefik.http.routers.duplicacy.middlewares=auth
+        - traefik.http.services.duplicacy.loadbalancer.server.port=3875
+
+networks:
+  overlay_network:
+    external: true
