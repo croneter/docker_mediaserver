@@ -11,7 +11,6 @@ services:
       - TZ=${TZ}
       - UMASK=007
     volumes:
-      - "${HTPC_CONFIG_DIR}/makemkv:/config"
       - "${HTPC_MOVIE_DIR}:/movies"
       - "${HTPC_SHOW_DIR}:/shows"
       - "${HTPC_COMPLETED_DIR}:/completed"
