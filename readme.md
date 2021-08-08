@@ -224,6 +224,11 @@ docker cp directory/. dummy:/root/
 docker stop dummy
 ```
 
+### Find the 20 largest files NOT containing `.mkv`
+```
+find . -printf '%s %p\n'| sort -nr | grep -v '.mkv' | head -n 20
+```
+
 ### Convert all audio streams to AC3 / Dolby Surround 5.1, leave video untouched
 ```
 docker run -v "$(pwd):$(pwd)" -w "$(pwd)" jrottenberg/ffmpeg:4.1-alpine \
