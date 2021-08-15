@@ -1,0 +1,38 @@
+version: "3.7"
+
+services:
+  qbittorrent:
+    image: ghcr.io/linuxserver/qbittorrent:latest
+    networks:
+      - overlay_network
+    ports:
+      - ${HTPC_DELUGE_DOWNLOAD_PORT}:6881
+    environment:
+      - PUID=${PUID}
+      - PGID=${GROUP_ID_DOWNLOADERS}
+      - TZ=${TZ}
+      - UMASK=007
+    volumes:
+      - "${HTPC_CONFIG_DIR}/qbittorrent:/config"
+      - "${HTPC_COMPLETED_DIR}:/completed"
+      - "${HTPC_INCOMPLETE_DIR}:/incomplete"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
+      interval: 2m
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+    deploy:
+      restart_policy:
+        condition: on-failure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.qbittorrent.entrypoints=websecure
+        - traefik.http.routers.qbittorrent.rule=Host(`qbittorrent.${HTPC_DOMAIN}`)
+        - traefik.http.routers.qbittorrent.tls=true
+        - traefik.http.routers.qbittorrent.middlewares=auth
+        - traefik.http.services.qbittorrent.loadbalancer.server.port=8080
+
+networks:
+  overlay_network:
+    external: true

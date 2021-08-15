@@ -32,6 +32,7 @@ CONFIG_SUBFOLDERS = (
     'sabnzbd',
     'sonarr',
     'tdarr',
+    'qbittorrent'
 )
 DOWNLOAD_SUBFOLDERS = (
     'complete',
