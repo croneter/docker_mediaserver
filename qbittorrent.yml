@@ -14,7 +14,7 @@ services:
       - UMASK=007
     volumes:
       - "${HTPC_CONFIG_DIR}/qbittorrent:/config"
-      - "${HTPC_COMPLETED_DIR}:/completed"
+      - "${HTPC_COMPLETED_DIR}:/downloads"
       - "${HTPC_INCOMPLETE_DIR}:/incomplete"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080"]
