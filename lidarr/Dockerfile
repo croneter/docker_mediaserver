@@ -4,7 +4,7 @@ FROM linuxserver/lidarr:latest
 LABEL maintainer="Croneter"
 
 RUN apt-get update \
-    && apt-get -y install ffmpeg gawk \
+    && apt-get -y --no-install-recommends install ffmpeg gawk \
     # Cleanup cache
     && apt-get clean autoclean \
     && apt-get autoremove --yes \
