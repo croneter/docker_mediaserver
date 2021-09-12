@@ -21,6 +21,7 @@ ALL = (
     'sabnzbd',
     'sonarr',
     'tdarr',
+    'qbittorrent',
     'makemkv'
 )
 ENCODING = 'utf-8'
@@ -37,8 +38,8 @@ def list_from_stdout(reply, first_column_name):
     answ = []
     for line in iterator:
         answ.append(dict(itertools.zip_longest(column_names,
-                                              line.split(),
-                                              fillvalue=None)))
+                                               line.split(),
+                                               fillvalue=None)))
     return answ
 
 
