@@ -8,7 +8,7 @@ services:
     hostname: duplicacy-web-docker
     environment:
       # Get latest and stable versions here: https://duplicacy.com/latest_web_version
-      - DUPLICACY_WEB_VERSION1.5.0
+      - DUPLICACY_WEB_VERSION=1.5.0
       - TZ=${TZ}
     volumes:
       - "${HTPC_CONFIG_DIR}/duplicacy:/config"
