@@ -24,7 +24,7 @@ services:
       restart_policy:
         condition: on-failure
   keycloak:
-    image: jboss/keycloak:15.1.0
+    image: jboss/keycloak:16.0.0
     networks:
       - overlay_network
       - keycloak
