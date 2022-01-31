@@ -2,7 +2,7 @@ version: "3.7"
 
 services:
   traefik:
-    image: traefik:v2.5.6
+    image: traefik:v2.6.0
     networks:
       - overlay_network
     ports:
