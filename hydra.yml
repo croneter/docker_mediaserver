@@ -19,10 +19,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 1m
-    # Fix for older Docker versions
-    # https://github.com/linuxserver/docker-nzbhydra2/issues/20
-    security_opt:
-      - seccomp=unconfined
     deploy:
       restart_policy:
         condition: on-failure
