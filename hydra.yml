@@ -4,7 +4,7 @@ services:
   hydra:
     # Fix for older Docker versions
     # https://github.com/linuxserver/docker-nzbhydra2/issues/20
-    image: linuxserver/nzbhydra2:v4.3.1-ls51
+    image: linuxserver/nzbhydra2
     networks:
       - overlay_network
     environment:
